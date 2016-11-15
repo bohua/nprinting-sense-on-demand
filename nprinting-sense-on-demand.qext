@@ -1,0 +1,16 @@
+{
+	"name": "NPrinting On Demand",
+	"description": "NPrinting On Demand Extension for Qlik Sense",
+	"type": "visualization",
+	"version": "1.0.0",
+	"icon": "line-chart",
+	"preview": "./images/preview.png",
+	"author": "Bohua Li",
+	"homepage": "",
+	"keywords": "nprinting, ondemand, qlik-sense, visualization",
+	"license": "",
+	"repository": "",
+	"dependencies": {
+		"qlik-sense": ">=3.0.x"
+	}
+}
