@@ -1,3 +1,26 @@
 .pointer {
-	cursor: pointer;
+	cursor: pointer!important;
+}
+
+.bold {
+	font-weight: bold!important;
+}
+
+.npsod-img-header {
+	max-width: 64px;
+	max-height: 64px;
+}
+
+.npsod-img-list {
+	max-width: 128px;
+	max-height: 128px;
+	margin: 20px;
+}
+
+img.npsod-img-list:hover{
+		background-color:#e8e8e8;
+	};
+
+.npsod-list-group > div:hover{
+	background-color: #e8e8e8;
 }
