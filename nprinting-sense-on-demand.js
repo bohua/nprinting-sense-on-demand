@@ -23,7 +23,7 @@ define([
 
 		$(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight'><span data-icon='toolbar-print'></span></button>"));
 
-		function getLoginNtlm(conn){
+		function getLoginNtlm(conn) {
 			var URL = conn.server + 'api/v1/login/ntlm'
 			return $.ajax({
 				url: URL,
@@ -87,24 +87,27 @@ define([
 
 		}
 
-		function doExport(URL, report, format, $scope) {
+		function doExport(conn, report, format) {
+			var requestUrl = conn.server + 'api/v1/ondemand/requests';
 			var onDemandRequest = {
 				type: "report",
 				config: {
 					reportId: report,
-					outputFormat: format == 'DEFAULT' ? 'XLS' : format
+					outputFormat: format
 				}
 			};
 
-			$.ajax({
-				url: URL,
+			return $.ajax({
+				url: requestUrl,
 				method: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify(onDemandRequest),
 				xhrFields: {
 					withCredentials: true
 				}
-			}).then(function(response) {
+			});
+
+			/*.then(function(response) {
 				var progress = new Progress($("#npsod-progress-bar"));
 
 				checkProgress(URL + '/' + response.data.id, progress, function() {
@@ -113,6 +116,7 @@ define([
 					$scope.$apply();
 				});
 			});
+			*/
 
 		}
 
@@ -126,6 +130,47 @@ define([
 					withCredentials: true
 				}
 			});
+		}
+
+		function getExportFormats(conn, report) {
+			var requestUrl = conn.server + 'api/v1/reports' + '/' + report.id;
+			return $.ajax({
+				url: requestUrl,
+				method: 'GET',
+				xhrFields: {
+					withCredentials: true
+				}
+			})
+		}
+
+		function getTasks(conn) {
+			var requestUrl = conn.server + 'api/v1/ondemand/requests' + '?appId=' + conn.app + '&sort=-created';
+
+			return $.ajax({
+				url: requestUrl,
+				method: 'GET',
+				xhrFields: {
+					withCredentials: true
+				}
+			});
+		}
+
+		function deleteTask(conn, taskId){
+			var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId;
+
+			return $.ajax({
+				url: requestUrl,
+				method: 'DELETE',
+				xhrFields: {
+					withCredentials: true
+				}
+			});
+		}
+
+		function downloadTask(conn, taskId){
+			var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId + '/result';
+
+			document.getElementById('download').src = requestUrl;
 		}
 
 		function getImg(type) {
@@ -179,6 +224,9 @@ define([
 				case 'BMP':
 					return '../extensions/nprinting-sense-on-demand/images/icon-file-bmp.png';
 
+				case 'LOADING':
+					return '../extensions/nprinting-sense-on-demand/images/loading-gear.gif';
+					//return '../resources/img/core/loader.svg';
 				default:
 					return '../extensions/nprinting-sense-on-demand/images/icon-template-pp.png';
 			}
@@ -209,6 +257,8 @@ define([
 				var conn = $scope.layout.npsod.conn;
 				var currReport = null;
 
+				getLoginNtlm(conn);
+
 				$scope.popupDg = function(format) {
 					//exportReport(format, currReport);
 					var viewPopupDg = $compile(viewPopup);
@@ -219,25 +269,30 @@ define([
 						modal.remove();
 					});
 
+					$scope.go2OverviewStage(conn);
+				};
+
+				$scope.getImg = getImg;
+
+				$scope.go2OverviewStage = function() {
+					getTasks(conn).then(function(response) {
+						$scope.taskList = response.data.items;
+						$scope.stage = 'overview';
+
+						$scope.$apply();
+					});
+				};
+
+				$scope.go2SelectReportStage = function() {
 					getReportList(conn).then(function(response) {
 						$scope.reportList = response.data;
 						$scope.stage = 'selectReport';
 						$scope.$apply();
 					});
-
-
-					$scope.getImg = getImg;
 				};
 
-				$scope.go2selectReportStage = function(report) {
-					var requestUrl = conn.server + 'api/v1/reports' + '/' + report.id;
-					$.ajax({
-						url: requestUrl,
-						method: 'GET',
-						xhrFields: {
-							withCredentials: true
-						}
-					}).then(function(response) {
+				$scope.go2selectFormatStage = function(report) {
+					getExportFormats(conn, report).then(function(response) {
 						$scope.currReport = report;
 						$scope.outputFormats = response.data.outputFormats;
 
@@ -246,13 +301,22 @@ define([
 						$scope.$apply();
 					});
 				};
-				//doExport(conn.server + 'api/v1/ondemand/requests', conn.report, format);
-				$scope.exportReport = function(format){
-					$scope.stage = 'export';
-					
 
-					doExport(conn.server + 'api/v1/ondemand/requests', $scope.currReport.id, format, $scope);
+				$scope.exportReport = function(format) {
+					doExport(conn, $scope.currReport.id, format).then(function(){
+						$scope.go2OverviewStage();
+					});
 				};
+
+				$scope.deleteTask = function(taskId) {
+					deleteTask(conn, taskId).then(function(){
+						$scope.go2OverviewStage(conn);
+					});
+				}
+
+				$scope.downloadTask = function(taskId) {
+					downloadTask(conn, taskId);
+				}
 			}]
 
 			/*

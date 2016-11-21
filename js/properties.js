@@ -2,7 +2,6 @@ var connectionSection = {
 	type: "items",
 	label: "NPrinting Connection",
 	items: {
-
 		server: {
 			ref: "npsod.conn.server",
 			label: "Server Connection",
@@ -10,13 +9,41 @@ var connectionSection = {
 			expression: "optional"
 		},
 
-		testConn: {
-			label: "Test Connection",
-			component: "button",
-			action: function(data) {
-				//Test the connection by sending API request ntlm request
+		/*
+		ntlm: {
+			ref: "npsod.conn.ntlm",
+			type: "string",
+			defaultValue: "null",
+			show: function(){
+				return false;
 			}
 		},
+
+		test: {
+			label: "Connect",
+			component: "button",
+			ref: "npsod.conn.ntlm",
+			action: function(data) {
+				//Test the connection by sending API request ntlm request
+				var URL = data.npsod.conn.server + 'api/v1/login/ntlm'
+				$.ajax({
+					url: URL,
+					method: 'GET',
+					xhrFields: {
+						withCredentials: true
+					}
+				}).done(function(response){
+					if(response.code == 0){
+						alert("Connect Succeed!");
+					}else {
+						alert("Connect Failed! Message:" + response.message + ' Code: (' + response.code + ')');
+					}
+				}).fail(function(e){
+					alert("Connect Failed! Pease check your connection.");		
+				});
+			}
+		},
+		*/
 
 		app: {
 			type: "string",
@@ -31,7 +58,7 @@ var connectionSection = {
 						withCredentials: true
 					}
 				}).then(function(response) {
-					return response.data.items.map(function(app){
+					return response.data.items.map(function(app) {
 						return {
 							value: app.id,
 							label: app.name
@@ -39,18 +66,16 @@ var connectionSection = {
 					});
 				});
 			}
-		},
+		}
 
+		/*
 		report: {
 			type: "string",
 			component: "dropdown",
 			label: "Choose Report",
 			ref: "npsod.conn.report",
 			options: function(data) {
-				var requestUrl = data.npsod.conn.server 
-								+ 'api/v1/reports' 
-								+ '?appId=' + data.npsod.conn.app
-								+ '&sort=+title';
+				var requestUrl = data.npsod.conn.server + 'api/v1/reports' + '?appId=' + data.npsod.conn.app + '&sort=+title';
 
 				return $.ajax({
 					url: requestUrl,
@@ -59,7 +84,7 @@ var connectionSection = {
 						withCredentials: true
 					}
 				}).then(function(response) {
-					return response.data.items.map(function(report){
+					return response.data.items.map(function(report) {
 						return {
 							value: report.id,
 							label: report.title
@@ -68,5 +93,6 @@ var connectionSection = {
 				});
 			}
 		}
+		*/
 	}
 };
