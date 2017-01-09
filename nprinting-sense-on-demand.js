@@ -4,7 +4,7 @@ define([
 		"./js/properties",
 		"text!./css/nprinting-sense-on-demand.css",
 		"text!./css/bootstrap.css",
-		"text!./template/view-main.html",
+		"text!./template/view-main-single.html",
 		"text!./template/view-popup.html",
 		"./js/button",
 		"./js/dropdown"
@@ -21,7 +21,7 @@ define([
 		$("<style>").html(css).appendTo("head");
 		$("<style>").html(bootstrap).appendTo("head");
 
-		$(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight'><span data-icon='toolbar-print'></span></button>"));
+		var printBtnOnBar = $(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight'><span data-icon='toolbar-print'></span></button>"));
 
 		function getLoginNtlm(conn) {
 			var URL = conn.server + 'api/v1/login/ntlm'
@@ -56,7 +56,7 @@ define([
 			};
 		}
 
-		function checkProgress(URL, progress, callback) {
+		function checkProgress(URL, /*progress,*/ callback) {
 			$.ajax({
 				url: URL,
 				method: 'GET',
@@ -72,15 +72,15 @@ define([
 
 					case 'queued':
 					case 'running':
-						progress.addProgress(10);
+						//progress.addProgress(10);
 						setTimeout(function() {
 							checkProgress(URL, progress, callback);
-						}, 500);
+						}, 1000);
 
 						break;
 
 					default:
-						progress.setProgress(100);
+						//progress.setProgress(100);
 						callback();
 				}
 			});
@@ -244,13 +244,14 @@ define([
 				label: "NPrinting On Demand",
 				component: "accordion",
 				items: {
-					connectionSection: connectionSection
+					connectionSection: connectionSection,
+					ReportSection: ReportSection
 				}
 			},
 
 			template: viewMain,
 
-			controller: ['$scope', '$element', '$compile', function($scope, $element, $compile) {
+			controller: ['$scope', '$element', '$compile', '$interval', function($scope, $element, $compile, $interval) {
 				$scope.label = "Export";
 				$scope.downloadable = false;
 
@@ -259,7 +260,18 @@ define([
 
 				getLoginNtlm(conn);
 
-				$scope.popupDg = function(format) {
+				printBtnOnBar.on('click', function(){
+					$scope.popupDg();
+				});
+
+				$scope.doExport = function() {
+					doExport(conn, conn.report, conn.exportFormat).then(function(response){
+						$scope.popupDg();
+					});
+				};
+
+
+				$scope.popupDg = function() {
 					//exportReport(format, currReport);
 					var viewPopupDg = $compile(viewPopup);
 					$("body").append(viewPopupDg($scope));
@@ -267,20 +279,26 @@ define([
 					var modal = $(".npsod-popup");
 					modal.find("button.cancel-button").on('qv-activate', function() {
 						modal.remove();
+						if(angular.isDefined(pullTaskHandler)){
+							$interval.cancel(pullTaskHandler);
+							pullTaskHandler = undefined;
+						}
 					});
 
-					$scope.go2OverviewStage(conn);
+					var pullTaskHandler = $interval(function(){
+							getTasks(conn).then(function(response) {
+								$scope.taskList = response.data.items;						
+								$scope.$apply();
+						});
+					}, 1000);
+
+					$scope.go2OverviewStage(conn);		
 				};
 
 				$scope.getImg = getImg;
 
 				$scope.go2OverviewStage = function() {
-					getTasks(conn).then(function(response) {
-						$scope.taskList = response.data.items;
-						$scope.stage = 'overview';
-
-						$scope.$apply();
-					});
+					$scope.stage = 'overview';
 				};
 
 				$scope.go2SelectReportStage = function() {

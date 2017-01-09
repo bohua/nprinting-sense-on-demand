@@ -67,8 +67,13 @@ var connectionSection = {
 				});
 			}
 		}
+	}
+};
 
-		/*
+var ReportSection ={
+	type: "items",
+	label: "Report Configuration",
+	items: {
 		report: {
 			type: "string",
 			component: "dropdown",
@@ -92,7 +97,31 @@ var connectionSection = {
 					});
 				});
 			}
+		},
+
+		exportFormat: {
+			type: "string",
+			component: "dropdown",
+			label: "Default Export Format",
+			ref: "npsod.conn.exportFormat",
+			options: function(data) {
+				var requestUrl = data.npsod.conn.server + 'api/v1/reports' + '/' + data.npsod.conn.report;
+
+				return $.ajax({
+					url: requestUrl,
+					method: 'GET',
+					xhrFields: {
+						withCredentials: true
+					}
+				}).then(function(response) {
+					return response.data.outputFormats.map(function(format) {
+						return {
+							value: format,
+							label: format.toUpperCase()
+						}
+					});
+				});
+			}
 		}
-		*/
 	}
 };
