@@ -5,5 +5,5 @@ js/button.js;
 js/dropdown.js;
 css/nprinting-sense-on-demand.css;
 css/bootstrap.css;
-template/view-main.html;
+template/view-main-single.html;
 template/view-popup.html;

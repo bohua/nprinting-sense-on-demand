@@ -52,3 +52,6 @@ img.npsod-img-list:hover{
     margin: 0 10px!important;
 }
 
+.npsod-export-btn {
+	width: 100%;
+}

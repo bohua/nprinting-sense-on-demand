@@ -21,7 +21,7 @@ define([
 		$("<style>").html(css).appendTo("head");
 		$("<style>").html(bootstrap).appendTo("head");
 
-		var printBtnOnBar = $(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight'><span data-icon='toolbar-print'></span></button>"));
+		$(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight npsod-bar-btn'><span data-icon='toolbar-print'></span></button>"));
 
 		function getLoginNtlm(conn) {
 			var URL = conn.server + 'api/v1/login/ntlm'
@@ -245,14 +245,15 @@ define([
 				component: "accordion",
 				items: {
 					connectionSection: connectionSection,
-					ReportSection: ReportSection
+					ReportSection: ReportSection,
+					Appearance: AppearanceSection
 				}
 			},
 
 			template: viewMain,
 
 			controller: ['$scope', '$element', '$compile', '$interval', function($scope, $element, $compile, $interval) {
-				$scope.label = "Export";
+				//$scope.label = "Export";
 				$scope.downloadable = false;
 
 				var conn = $scope.layout.npsod.conn;
@@ -260,7 +261,7 @@ define([
 
 				getLoginNtlm(conn);
 
-				printBtnOnBar.on('click', function(){
+				$('.npsod-bar-btn').on('click', function(){
 					$scope.popupDg();
 				});
 
@@ -330,11 +331,21 @@ define([
 					deleteTask(conn, taskId).then(function(){
 						$scope.go2OverviewStage(conn);
 					});
-				}
+				};
 
 				$scope.downloadTask = function(taskId) {
 					downloadTask(conn, taskId);
-				}
+				};
+
+
+				// Hacking the layout
+
+				var innerObj = $($element).parents(".qv-inner-object");
+				var outterObj = $($element).parents(".qv-object");
+
+				innerObj.css('background', 'transparent');
+				outterObj.css('border', 'none');
+				outterObj.find('.lui-icon--expand ').remove();
 			}]
 
 			/*

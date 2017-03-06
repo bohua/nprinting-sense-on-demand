@@ -125,3 +125,15 @@ var ReportSection ={
 		}
 	}
 };
+
+var AppearanceSection = {
+	uses: "settings",
+	items: {
+		label: {
+			ref: "npsod.conn.label",
+			label: "Button Label",
+			type: "string",
+			expression: "optional"
+		}
+	}
+};
