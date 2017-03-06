@@ -50,3 +50,16 @@ NPrinting On-demand extension for Qlik Sense
 5.Then it will come back to the Export overview and wait for the report to be accomplished.
 
 ![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/15.png)
+
+## Limitations
+1.(Due to techical reasons) The self-service button will not show up until you get into a sheet contains this extension. And it will always stay there until you refresh your page. And it's not working when you navigate to other sheets that don't contain this extension. This will be fixed in following release
+
+2.There should be a button in prop panel to control enabling or disabling the "Self-service" icon-button. Will be fixed in following releases
+
+## Roadmap
+0.Welcome for any suggestions
+1.Add a button in prop panel to enable/disable the 'Self-service' button
+2.Add "test connection" to give better response in prop panel to reflect the connection status and error messages if failed.
+3.Find a way to make the 'self-service' button working outside sheets that don't contain this extension
+4.Add permission control according to QRS user properties/security rules
+5.Add more settings in prop panel for customizing appearance
