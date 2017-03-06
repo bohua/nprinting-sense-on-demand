@@ -57,9 +57,21 @@ NPrinting On-demand extension for Qlik Sense
 2.There should be a button in prop panel to control enabling or disabling the "Self-service" icon-button. Will be fixed in following releases
 
 ## Roadmap
+
 0.Welcome for any suggestions
+
 1.Add a button in prop panel to enable/disable the 'Self-service' button
+
 2.Add "test connection" to give better response in prop panel to reflect the connection status and error messages if failed.
+
 3.Find a way to make the 'self-service' button working outside sheets that don't contain this extension
+
 4.Add permission control according to QRS user properties/security rules
+
 5.Add more settings in prop panel for customizing appearance
+
+## Contact
+
+For any questions and support, please feel free to contact:
+
+Bohua Li (bohua.li.1984@gmail.com)
