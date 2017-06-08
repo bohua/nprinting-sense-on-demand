@@ -6,7 +6,12 @@ define([
 		"text!./css/bootstrap.css",
 		"text!./template/view-main-single.html",
 		"text!./template/view-popup.html",
-		"./js/button",
+        "client.models/current-selections",
+        "qvangular",
+        "core.utils/deferred",
+        "objects.backend-api/listbox-api",
+        "objects.models/listbox",
+        "./js/button",
 		"./js/dropdown"
 	],
 	function(
@@ -16,7 +21,12 @@ define([
 		css,
 		bootstrap,
 		viewMain,
-		viewPopup
+		viewPopup,
+        CurrentSelectionsModel,
+        qvangular,
+        Deferred,
+        ListboxApi,
+        Listbox
 	) {
 		$("<style>").html(css).appendTo("head");
 		$("<style>").html(bootstrap).appendTo("head");
@@ -87,25 +97,90 @@ define([
 
 		}
 
-		function doExport(conn, report, format) {
-			var requestUrl = conn.server + 'api/v1/ondemand/requests';
-			var onDemandRequest = {
-				type: "report",
-				config: {
-					reportId: report,
-					outputFormat: format
-				}
-			};
+        function getSelections(layout, enigmaModel) {
+            var i, qSelections = layout.qSelectionObject ? layout.qSelectionObject.qSelections : null;
+            var fieldPromises = [];
 
-			return $.ajax({
-				url: requestUrl,
-				method: 'POST',
-				contentType: 'application/json',
-				data: JSON.stringify(onDemandRequest),
-				xhrFields: {
-					withCredentials: true
-				}
-			});
+            if (qSelections && qSelections.length > 0) {
+
+                var fieldExtractor = function (qFieldSelections, rects) {
+
+                    var rects = [{
+                        qTop: 0,
+                        qLeft: 0,
+                        qWidth: 1,
+                        qHeight: qFieldSelections.selectedCount
+                    }];
+
+                    var fp = Listbox.createTransientField(enigmaModel, qFieldSelections.fieldName, {}).then(function (model) {
+                        var backendApi = new ListboxApi(model);
+                        return backendApi.getData(rects).then(function (dataPages) {
+                            if (dataPages && dataPages.length) {
+                                var valArr = dataPages[0].qMatrix;
+                                var v;
+                                for (var j = 0; j < valArr.length; j++) {
+                                    v = valArr[j][0];
+                                    var isNum = !isNaN(v.qNum);
+                                    qFieldSelections.selectedValues.push(isNum ? v.qNum : v.qText);
+                                    // set isNumeric if there is a number
+                                    qFieldSelections.isNumeric = qFieldSelections.isNumeric || isNum;
+                                }
+                            }
+                            return qFieldSelections;
+                        });
+                    });
+                    return fp;
+                };
+
+                for (i = 0; i < qSelections.length; i++) {
+                    var fieldSelections ={
+                        fieldName: qSelections[i].qField,
+                        selectedCount:qSelections[i].qSelectedCount,
+                        selectedValues:[],
+                        isNumeric: false
+                    }
+                    fieldPromises.push(fieldExtractor(fieldSelections));
+                }
+            }
+
+            return Deferred.all(fieldPromises);
+        }
+
+		function doExport(conn, report, format) {
+            var app = qlik.currApp();
+
+            globalSelectionService = qvangular.getService('qvGlobalSelectionsService');
+
+            var selections = CurrentSelectionsModel.get().then(function (model) {
+                return model.getLayout().then(function (layout) {
+                    return getSelections(layout, app.model.enigmaModel);
+                });
+            });
+
+            return selections.then(function (allFieldSelections) {
+                    var requestUrl = conn.server + 'api/v1/ondemand/requests';
+                    var onDemandRequest = {
+                        type: 'report',
+                        config: {
+                            reportId: report,
+                            outputFormat: format
+                        },
+                        selections: allFieldSelections,
+						// here's the sense connection on which we want to apply selections
+                        connectionId: 'af16cb2b-1e33-495c-a38b-f090d2de57b3'
+                    };
+
+                    return $.ajax({
+                        url: requestUrl,
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(onDemandRequest),
+                        xhrFields: {
+                            withCredentials: true
+                        }
+                    });
+                }
+            )
 
 			/*.then(function(response) {
 				var progress = new Progress($("#npsod-progress-bar"));
