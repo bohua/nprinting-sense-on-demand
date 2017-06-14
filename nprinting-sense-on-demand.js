@@ -157,28 +157,63 @@ define([
                 });
             });
 
-            return selections.then(function (allFieldSelections) {
-                    var requestUrl = conn.server + 'api/v1/ondemand/requests';
-                    var onDemandRequest = {
-                        type: 'report',
-                        config: {
-                            reportId: report,
-                            outputFormat: format
-                        },
-                        selections: allFieldSelections,
-						// here's the sense connection on which we want to apply selections
-                        connectionId: 'af16cb2b-1e33-495c-a38b-f090d2de57b3'
-                    };
+            // return getConnections(conn).then(function(response){
+            // 	var connectionId;
+            // 	if(response.data.totalItems = 1){
+            // 		connectionId = response.data.items[0].id;
+            // 	} else {
+            // 		for(var i=0; i<response.data.items.length; i++){
+            // 			var str = response.data.items[i].connectionString,
+            // 				appId = str.split("appid=")[1].split(";")[0];
 
-                    return $.ajax({
-                        url: requestUrl,
-                        method: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify(onDemandRequest),
-                        xhrFields: {
-                            withCredentials: true
-                        }
-                    });
+            // 			if(appId == conn.app){
+            // 				connectionId = response.data.items[i].id;
+            // 				break;
+            // 			}
+            // 		}
+            // 	}
+            // });
+
+            return selections.then(function (allFieldSelections) {
+            		return getConnections(conn).then(function(response){
+            			var connectionId;
+		            	if(response.data.totalItems == 1){
+		            		connectionId = response.data.items[0].id;
+		            	} else {
+		            		for(var i=0; i<response.data.items.length; i++){
+		            			var str = response.data.items[i].connectionString,
+		            				appId = str.split("appid=")[1].split(";")[0];
+
+		            			if(appId == conn.app){
+		            				connectionId = response.data.items[i].id;
+		            				break;
+		            			}
+		            		}
+		            	}
+
+
+            			var requestUrl = conn.server + 'api/v1/ondemand/requests';
+	                    var onDemandRequest = {
+	                        type: 'report',
+	                        config: {
+	                            reportId: report,
+	                            outputFormat: format
+	                        },
+	                        selections: allFieldSelections,
+							// here's the sense connection on which we want to apply selections
+	                        connectionId: connectionId//'5c0af3f6-e65d-40d2-8f03-6025f8196ff'
+	                    };
+
+	                    return $.ajax({
+	                        url: requestUrl,
+	                        method: 'POST',
+	                        contentType: 'application/json',
+	                        data: JSON.stringify(onDemandRequest),
+	                        xhrFields: {
+	                            withCredentials: true
+	                        }
+	                    });
+            		});         
                 }
             )
 
@@ -230,11 +265,28 @@ define([
 			});
 		}
 
-		function deleteTask(conn, taskId){
-			var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId;
+		function getConnections(conn) {
+			var requestUrl = conn.server  + 'api/v1/connections?appId=' + conn.app;
 
 			return $.ajax({
 				url: requestUrl,
+				method: 'GET',
+				xhrFields: {
+					withCredentials: true
+				}
+			});
+		}
+
+		function deleteTask(conn, taskId){
+			var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId;
+
+			$.support.cors = true;
+
+			return $.ajax({
+				url: requestUrl,
+				headers:{
+					'access-control-allow-headers':'content-type'
+				},
 				method: 'DELETE',
 				xhrFields: {
 					withCredentials: true
