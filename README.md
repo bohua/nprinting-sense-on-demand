@@ -1,4 +1,4 @@
-# Important: It seems the extension is currently borken in June 2018 initial release, I will look into it as soon as I come back on 12th July. Please feel free to contact me directly for urgency. Thanks for understanding! 
+# ![#Important: It seems the extension is currently borken in June 2018 initial release, I will look into it as soon as I come back on 12th July. Please feel free to contact me directly for urgency. Thanks for understanding! ](https://placehold.it/15/f03c15/000000?text=+)
 
 # nprinting-sense-on-demand
 NPrinting On-demand extension for Qlik Sense
