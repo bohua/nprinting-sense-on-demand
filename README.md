@@ -1,4 +1,9 @@
-# ![#Important: It seems the extension is currently borken in June 2018 initial release, I will look into it as soon as I come back on 12th July. Please feel free to contact me directly for urgency. Thanks for understanding! ](https://placehold.it/15/f03c15/000000?text=+) ´Important: It seems the extension is currently borken in June 2018 initial release, I will look into it as soon as I come back on 12th July. Please feel free to contact me directly for urgency. Thanks for understanding! ´
+# ![#f03c15](https://placehold.it/15/f03c15/000000?text=+)The extension is currently borken in June 2018 initial release. 
+The root cause is found: it is due to Qlik Sense closes internal Javascript modules loading from extensions since June release. 
+
+Qlik team has confirmed that they will reopen some of the modules that are loaded by NP on-demand extension. It will happen in Qlik Sense 2018 June release Patch1!
+
+So you just need to wait for the next Qlik Sense patch release, which is coming soon. However, you have to double check with Qlik for release data.
 
 # nprinting-sense-on-demand
 NPrinting On-demand extension for Qlik Sense
