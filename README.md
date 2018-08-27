@@ -1,8 +1,11 @@
 # The extension is back again with June 2018 Release. 
-The on-demand selection code are now adapted to Capability APIs, not relying on Qlik internal moduels any more.
+With the latest update for this extension. The on-demand selection code has been adapted to Capability APIs, not relying on Qlik internal moduels any more.
+
+Please feel free to download the latest project and import into QMC. It will automatically work with any Qlik versions.
+
 It also resolves the problem with Qlik modules loading failure in mashups by the way. 
 
-# Commercial License avaialbe
+# Commercial License availabe
 With Qlik TED (Trusted Extension Developer) Program, S-cubed (DK) will align with Qlik to get the extension to be certified officially.
 
 Please feel free to visit S-cubed (http://www.s-cubed-global.com/services/data-visualisation/extensions/) for more info!
