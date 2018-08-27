@@ -1,4 +1,4 @@
-# ![#339966](https://placehold.it/15/f03c15/000000?text=+)The extension is back again with June 2018 Release. 
+# ![#339966]The extension is back again with June 2018 Release. 
 The on-demand selection code are now adapted to Capability APIs, not relying on Qlik internal moduels any more.
 It also resolves the problem with Qlik modules loading failure in mashups by the way. 
 
