@@ -1,9 +1,21 @@
-# ![#f03c15](https://placehold.it/15/f03c15/000000?text=+)The extension is currently borken in June 2018 initial release. 
-The root cause is found: it is due to Qlik Sense closes internal Javascript modules loading from extensions since June release. 
+# The extension is back again with June 2018 Release. 
+With the latest update for this extension. The on-demand selection code has been adapted to Capability APIs, not relying on Qlik internal moduels any more.
 
-Qlik team has confirmed that they will reopen some of the modules that are loaded by NP on-demand extension. It will happen in Qlik Sense 2018 June release Patch1!
+Please feel free to download the latest project and import into QMC. It will automatically work with any Qlik versions.
 
-So you just need to wait for the next Qlik Sense patch release, which is coming soon. However, you have to double check with Qlik for release data.
+It also resolves the problem with Qlik modules loading failure in mashups by the way. 
+
+# Commercial License availabe
+With Qlik TED (Trusted Extension Developer) Program, S-cubed (DK) will align with Qlik to get the extension to be certified officially.
+
+Please feel free to visit S-cubed (http://www.s-cubed-global.com/services/data-visualisation/extensions/) for more info!
+
+We have more interesting projects there to be explored. Such as 
+1. Write Back extension with pure Qlik Sense extension (No extra backend service needed)
+2. Navigation extension (whole new experience with Qlik Sense navigations and experiences)
+3. SAS Data Connector (supports customized Easy Morph projects outputs to be triggered and loaded in Qlik load script)
+
+Direct contact: Bohua Li (bl@s-cubed.dk).
 
 # nprinting-sense-on-demand
 NPrinting On-demand extension for Qlik Sense
@@ -81,4 +93,4 @@ NPrinting On-demand extension for Qlik Sense
 
 For any questions and support, please feel free to contact:
 
-Bohua Li (bohua.li.1984@gmail.com)
+Bohua Li (bl@s-cubed.dk)
