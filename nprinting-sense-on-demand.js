@@ -213,8 +213,7 @@ define([
                         connectionId = response.data.items[0].id;
                     } else {
                         for (var i = 0; i < response.data.items.length; i++) {
-                            var str = response.data.items[i].connectionString,
-                                appId = str.split("appid=")[1].split(";")[0];
+                            var appId = response.data.items[i].appId;
 
                             if (appId == conn.app) {
                                 connectionId = response.data.items[i].id;
@@ -372,7 +371,6 @@ define([
 
                 case 'LOADING':
                     return '../extensions/nprinting-sense-on-demand/images/loading-gear.gif';
-                //return '../resources/img/core/loader.svg';
                 default:
                     return '../extensions/nprinting-sense-on-demand/images/icon-template-pp.png';
             }
@@ -392,7 +390,15 @@ define([
                 items: {
                     connectionSection: connectionSection,
                     ReportSection: ReportSection,
-                    Appearance: AppearanceSection
+                    Appearance: AppearanceSection,
+                    addons: {
+                        uses: "addons",
+                        items: {
+                            dataHandling: {
+                                uses: "dataHandling"
+                            }
+                        }
+                    }
                 }
             },
 
