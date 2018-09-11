@@ -24,7 +24,7 @@ define([
         viewPopup,
         //CurrentSelectionsModel,
         qvangular,
-        Deferred,
+        Deferred
         //ListboxApi,
         //Listbox
     ) {
