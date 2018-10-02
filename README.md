@@ -5,18 +5,6 @@ Please feel free to download the latest project and import into QMC. It will aut
 
 It also resolves the problem with Qlik modules loading failure in mashups by the way. 
 
-# Commercial License availabe
-With Qlik TED (Trusted Extension Developer) Program, S-cubed (DK) will align with Qlik to get the extension to be certified officially.
-
-Please feel free to visit S-cubed (http://www.s-cubed-global.com/services/data-visualisation/extensions/) for more info!
-
-We have more interesting projects there to be explored. Such as 
-1. Write Back extension with pure Qlik Sense extension (No extra backend service needed)
-2. Navigation extension (whole new experience with Qlik Sense navigations and experiences)
-3. SAS Data Connector (supports customized Easy Morph projects outputs to be triggered and loaded in Qlik load script)
-
-Direct contact: Bohua Li (bl@s-cubed.dk).
-
 # nprinting-sense-on-demand
 NPrinting On-demand extension for Qlik Sense
 
