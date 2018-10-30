@@ -35,12 +35,15 @@ define([
 
         var app = qlik.currApp();
         var currentSelections;
-
+        
         function getLoginNtlm(conn) {
             var URL = conn.server + 'api/v1/login/ntlm'
             return $.ajax({
                 url: URL,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -73,6 +76,9 @@ define([
             $.ajax({
                 url: URL,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -239,6 +245,10 @@ define([
                         url: requestUrl,
                         method: 'POST',
                         contentType: 'application/json',
+                        crossDomain: true,
+                        headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                         data: JSON.stringify(onDemandRequest),
                         xhrFields: {
                             withCredentials: true
@@ -254,6 +264,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -265,6 +278,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -277,6 +293,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -289,6 +308,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -303,8 +325,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 headers: {
-                    'access-control-allow-headers': 'content-type'
-                },
+                    'access-control-allow-headers': 'content-type',
+                    'Access-Control-Allow-Origin': conn.server
+                        },
                 method: 'DELETE',
                 xhrFields: {
                     withCredentials: true
