@@ -19,7 +19,7 @@ jobs:
           command: npm install
       - run:
           name: Build
-          command: npm run build
+          command: npm run build:zip
       - persist_to_workspace:
           root: ~/qlik-on-demand-reporting
           paths:
