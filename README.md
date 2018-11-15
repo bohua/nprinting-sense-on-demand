@@ -1,7 +1,5 @@
 # nprinting-sense-on-demand
-NPrinting On-demand extension for Qlik Sense.
-
-Tested on Qlik Sense November 2018.
+NPrinting On-demand extension for Qlik Sense. This extension is a part of dashboard bundle, delivered with Qlik Sense November 2018.
 
 # Get Started
 
@@ -44,7 +42,7 @@ If you want to do code changes to the extension follow these simple steps to get
 1. Create a new app and add qsVariable to a sheet.
 2. Clone the repository
 3. Run `npm install`
-4. Change the path to `/dist` folder in `gulpfile.js(row 8)` to be your local extensions folder. It will be something like `C:/Users/<user>/Documents/Qlik/Sense/Extensions/qlik-multi-kpi`.
+4. Change the path to `/dist` folder in `gulpfile.js(row 8)` to be your local extensions folder. It will be something like `C:/Users/<user>/Documents/Qlik/Sense/Extensions/qlik-on-demand-reporting`.
 5. Run `npm run build:debug` - this command should output unminified code to the path configured in step four.
 
 ```
