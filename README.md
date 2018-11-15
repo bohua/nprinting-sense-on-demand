@@ -1,14 +1,19 @@
-# The extension is back again with June 2018 Release. 
-With the latest update for this extension. The on-demand selection code has been adapted to Capability APIs, not relying on Qlik internal moduels any more.
-
-Please feel free to download the latest project and import into QMC. It will automatically work with any Qlik versions.
-
-It also resolves the problem with Qlik modules loading failure in mashups by the way. 
-
 # nprinting-sense-on-demand
-NPrinting On-demand extension for Qlik Sense
+NPrinting On-demand extension for Qlik Sense.
 
-## Get Started:
+Tested on Qlik Sense November 2018.
+
+# Get Started
+
+## Installation
+1. Download the extension zip, `qlik-on-demand-reporting.zip`, from the latest release (https://github.com/qlik-oss/nprinting-sense-on-demand/releases/latest)
+2. Install the extension:
+
+    a. **Qlik Sense Desktop**: unzip to a directory under [My Documents]/Qlik/Sense/Extensions.
+    
+    b. **Qlik Sense Server**: import the zip file in the QMC.
+
+## Usage
 
 1.Drag in extension onto your sheet.
 
@@ -36,48 +41,29 @@ NPrinting On-demand extension for Qlik Sense
 
 ![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/8.png)
 
-## Self-Service Report
+# Developing the extension
 
-1.A Printer icon-button is appended in the top when this extension is used. (Please just don't ask how :D ) 
+If you want to do code changes to the extension follow these simple steps to get going.
 
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/11.png)
+1. Get Qlik Sense Desktop
+1. Create a new app and add qsVariable to a sheet.
+2. Clone the repository
+3. Run `npm install`
+4. Change the path to `/dist` folder in `gulpfile.js(row 8)` to be your local extensions folder. It will be something like `C:/Users/<user>/Documents/Qlik/Sense/Extensions/qlik-multi-kpi`.
+5. Run `npm run build:debug` - this command should output unminified code to the path configured in step four.
 
-2.You probably already noticed this in previews tutorial, that there's a "New Report" button down there. That's for self-service report generation.
+```
+// Minified output to /dist folder.
+$ npm run build
+```
 
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/12.png)
+```
+// Outputs a .zip file to /dist folder.
+$ npm run build:zip
+```
 
-3.Press the button and all 'On-Demand' reports (that current user is allowed to see) will be listed.
-
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/13.png)
-
-4.Then choose your desired report format
-
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/14.png)
-
-5.Then it will come back to the Export overview and wait for the report to be accomplished.
-
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/15.png)
-
-## Limitations
-1.(Due to techical reasons) The self-service button will not show up until you get into a sheet contains this extension. And it will always stay there until you refresh your page. And it's not working when you navigate to other sheets that don't contain this extension. This will be fixed in following release
-
-2.There should be a button in prop panel to control enabling or disabling the "Self-service" icon-button. Will be fixed in following releases
-
-## Roadmap
-
-0.Welcome for any suggestions
-
-1.Add a button in prop panel to enable/disable the 'Self-service' button
-
-2.Add "test connection" to give better response in prop panel to reflect the connection status and error messages if failed.
-
-3.Find a way to make the 'self-service' button working outside sheets that don't contain this extension
-
-4.Add permission control according to QRS user properties/security rules
-
-5.Add more settings in prop panel for customizing appearance
-
-## Contact
+# Original Author
+[bohua](https://github.com/bohua)
 
 For any questions and support, please feel free to contact:
 
