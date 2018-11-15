@@ -21,25 +21,25 @@ Tested on Qlik Sense November 2018.
 
 3.Choose an app from the following dropbox
 
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/1_3.png)
+![alt tag](/tutorial/1.png)
 
 4.Pick your report in "Report Configuration" Section
 
 5.And choose your expected export format
 
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/4_5.png)
+![alt tag](/tutorial/2.png)
 
 6.Go to Analysis Mode and Press the button to start report generation
 
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/6.png)
+![alt tag](/tutorial/3.png)
 
 7.Popup window will show up and auto pulling the status of the generation.
 
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/7.png)
+![alt tag](/tutorial/4.png)
 
 8.When reported is generated on NPrinting server, the download button will appear. Click the button to download your report.
 
-![alt tag](https://github.com/bohua/nprinting-sense-on-demand/blob/master/tutorial/8.png)
+![alt tag](/tutorial/5.png)
 
 # Developing the extension
 
