@@ -15,30 +15,25 @@ Tested on Qlik Sense November 2018.
 
 ## Usage
 
-1.Drag in extension onto your sheet.
+1. Drag in extension onto your sheet.
 
-2.Configure NPrinting Server host name with '/' at the end, such as https://nprinting.test.local:4993/
+2. Configure NPrinting Server host name with '/' at the end, such as https://nprinting.test.local:4993/
 
-3.Choose an app from the following dropbox
-
+3. Choose an app from the following dropbox
 ![alt tag](/tutorial/1.png)
 
-4.Pick your report in "Report Configuration" Section
+4. Pick your report in "Report Configuration" Section
 
-5.And choose your expected export format
-
+5. And choose your expected export format
 ![alt tag](/tutorial/2.png)
 
-6.Go to Analysis Mode and Press the button to start report generation
-
+6. Go to Analysis Mode and Press the button to start report generation
 ![alt tag](/tutorial/3.png)
 
-7.Popup window will show up and auto pulling the status of the generation.
-
+7. Popup window will show up and auto pulling the status of the generation.
 ![alt tag](/tutorial/4.png)
 
-8.When reported is generated on NPrinting server, the download button will appear. Click the button to download your report.
-
+8. When reported is generated on NPrinting server, the download button will appear. Click the button to download your report.
 ![alt tag](/tutorial/5.png)
 
 # Developing the extension
@@ -64,7 +59,3 @@ $ npm run build:zip
 
 # Original Author
 [bohua](https://github.com/bohua)
-
-For any questions and support, please feel free to contact:
-
-Bohua Li (bl@s-cubed.dk)
