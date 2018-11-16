@@ -1,5 +1,5 @@
 # nprinting-sense-on-demand
-NPrinting On-demand extension for Qlik Sense. This extension is a part of dashboard bundle, delivered with Qlik Sense November 2018.
+NPrinting On-demand extension for Qlik Sense. This extension is a part of dashboard bundle, first delivered with Qlik Sense November 2018.
 
 # Get Started
 
