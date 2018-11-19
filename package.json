@@ -1,6 +1,6 @@
 {
     "name": "qlik-on-demand-reporting",
-    "version": "2.0.9",
+    "version": "2.0.10",
     "description": "Reporting on demand extension for Qlik Sense",
     "private": true,
     "homepage": "https://github.com/bohua/nprinting-sense-on-demand",
