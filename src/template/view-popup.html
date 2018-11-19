@@ -9,11 +9,11 @@
 			<ul class="lui-list print-overview">
 				<li class="lui-list__item" ng-repeat="task in taskList">
 					<span class="lui-list__text">
-						<span class="task-title">{{task.title}} - </span>({{task.outputFormat}}) - 
+						<span class="task-title" title={{task.title}}>{{task.title.length > 50 ? task.title.slice(0,50) + '...' : task.title}} - </span>({{task.outputFormat}}) - 
 						<drm-format-date x-date="task.created" x-skeleton="yMMMdjm"></drm-format-date>
-						<span ng-if="task.status=='failed'" class="task-title" style="float: right;">Request failed</span>
 					</span>
 					<span class="lui-list__aside">
+						<span ng-if="task.status=='failed'" class="task-title" style="float: left; padding-right: 10px">Request failed</span>
 						<span ng-if="task.status=='completed'" ng-click="downloadTask(task.id)" class="lui-icon  lui-icon--download"></span>
 						<span ng-if=" task.status=='running' || task.status=='queued'">
 							<div class="pp-loader qv-loader"></div>
@@ -31,7 +31,7 @@
 				</li>
 				<li class="lui-list__item" ng-repeat="report in reportList.items" ng-click="go2selectFormatStage(report)">
 					<span class="lui-list__text">
-						<h4 class="list-group-item-heading bold">{{report.title}}</h4>
+						<h4 class="list-group-item-heading bold" title={{report.title}}>{{report.title.length > 50 ? report.title.slice(0,50) + '...' : report.title}}</h4>
 						<p class="list-group-item-text">Description: {{report.description}}</p>
 						<p class="list-group-item-text">Type: {{report.type}}</p>
 						<p class="list-group-item-text">Created: <drm-format-date x-date="report.created" x-skeleton="yMMMdjm"></drm-format-date></p>

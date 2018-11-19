@@ -38,7 +38,7 @@ define([],
           return response.data.items.map(function(app) {
             return {
               value: app.id,
-              label: app.name
+              label: app.name.length > 50 ? app.name.slice(0,50) + '...' : app.name
             }
           });
         });
@@ -66,7 +66,7 @@ define([],
         return response.data.items.map(function(report) {
           return {
             value: report.id,
-            label: report.title
+            label: report.title.length > 50 ? report.title.slice(0,50) + '...' : report.title
           }
         });
       });
