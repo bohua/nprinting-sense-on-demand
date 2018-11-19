@@ -18,7 +18,7 @@
 						<span ng-if=" task.status=='running' || task.status=='queued'">
 							<div class="pp-loader qv-loader"></div>
 						</span>
-						<span ng-if=" task.status == 'completed' || task.status == 'queued' || task.status == 'failed' " ng-click="deleteTask(task.id)" class="lui-icon  lui-icon--bin"></span>
+						<span ng-click="deleteTask(task.id)" class="lui-icon  lui-icon--bin"></span>
 					</span>
 				</li>
 			</ul>
