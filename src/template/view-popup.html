@@ -13,12 +13,12 @@
 						<drm-format-date x-date="task.created" x-skeleton="yMMMdjm"></drm-format-date>
 					</span>
 					<span class="lui-list__aside">
-						<span ng-if="task.status=='failed'" class="task-title" style="float: left; padding-right: 10px">Request failed</span>
+						<span ng-if="task.status=='failed'" class="task-title">Request failed</span>
 						<span ng-if="task.status=='completed'" ng-click="downloadTask(task.id)" class="lui-icon  lui-icon--download"></span>
 						<span ng-if=" task.status=='running' || task.status=='queued'">
 							<div class="pp-loader qv-loader"></div>
 						</span>
-						<span ng-if=" task.status == 'completed' || task.status == 'queued' || task.status == 'failed' " ng-click="deleteTask(task.id)" class="lui-icon  lui-icon--bin"></span>
+						<span ng-click="deleteTask(task.id)" style="padding-left: 10px"class="lui-icon  lui-icon--bin"></span>
 					</span>
 				</li>
 			</ul>
