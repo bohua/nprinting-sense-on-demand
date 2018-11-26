@@ -58,7 +58,14 @@ define(["./helpers"], function (hlp) {
 			},
 			selections: {
 			  show:false
-			}
+			},
+			general: {
+				items: {
+					details: {
+						show: false
+					}
+				}
+			},
 		}
 	};
 
