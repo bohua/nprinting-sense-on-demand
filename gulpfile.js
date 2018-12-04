@@ -93,4 +93,12 @@ gulp.task('debug', ['clean', 'qext', 'css'], function () {
 		.pipe(gulp.dest(DIST));
 });
 
+gulp.task('debug-zip', ['debug'], function () {
+	var zip = require('gulp-zip');
+
+	return gulp.src(DIST + '/**/*')
+		.pipe(zip(`${NAME}_${pkg.version}.zip`))
+		.pipe(gulp.dest(DIST));
+});
+
 gulp.task('default', ['build']);
