@@ -8,7 +8,7 @@ define(["./helpers"], function (hlp) {
 				ref: "npsod.conn.server",
 				label: "Server Connection",
 				type: "string",
-				expression: "optional"
+				expression: false
 			},
 			app: {
 				type: "string",

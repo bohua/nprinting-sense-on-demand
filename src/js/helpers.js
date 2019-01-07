@@ -3,14 +3,10 @@ define([],
 	  'use strict';
 	
 	  return {
-      isServerSet: function (data){
-        if(data.npsod.conn.server.length > 0){
-          return true;
-        } else {
-          return false;
-        }
+      isServerSet: function (data) {
+        return data.npsod.conn.server.length > 0;
       },
-      doGetActionURL: function (server, url){
+      doGetActionURL: function (server, url) {
         var B = server;
         B.trim();
         var L = B.slice(-1);
