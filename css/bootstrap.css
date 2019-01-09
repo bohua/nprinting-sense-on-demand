@@ -257,7 +257,7 @@
 @font-face {
   font-family: 'Glyphicons Halflings';
   src: url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.eot');
-  src: url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.woff2') format('woff2'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.woff2') format('font/woff2'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/extensions/nprinting-sense-on-demand/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .bootstrap_inside .glyphicon {
   position: relative;

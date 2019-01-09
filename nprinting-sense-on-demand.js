@@ -31,16 +31,19 @@ define([
         $("<style>").html(css).appendTo("head");
         $("<style>").html(bootstrap).appendTo("head");
 
-        $(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight npsod-bar-btn'><span data-icon='toolbar-print'></span></button>"));
+        $(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight npsod-bar-btn'><span data-icon='toolbar-print'>NPrinting Reports</span></button>"));
 
         var app = qlik.currApp();
         var currentSelections;
-
+        
         function getLoginNtlm(conn) {
             var URL = conn.server + 'api/v1/login/ntlm'
             return $.ajax({
                 url: URL,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -73,6 +76,9 @@ define([
             $.ajax({
                 url: URL,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -239,6 +245,10 @@ define([
                         url: requestUrl,
                         method: 'POST',
                         contentType: 'application/json',
+                        crossDomain: true,
+                        headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                         data: JSON.stringify(onDemandRequest),
                         xhrFields: {
                             withCredentials: true
@@ -254,6 +264,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -265,6 +278,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -277,6 +293,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -289,6 +308,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                            'Access-Control-Allow-Origin': conn.server
+                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -303,8 +325,9 @@ define([
             return $.ajax({
                 url: requestUrl,
                 headers: {
-                    'access-control-allow-headers': 'content-type'
-                },
+                    'access-control-allow-headers': 'content-type',
+                    'Access-Control-Allow-Origin': conn.server
+                        },
                 method: 'DELETE',
                 xhrFields: {
                     withCredentials: true
@@ -432,26 +455,29 @@ define([
 
                 $scope.popupDg = function () {
                     //exportReport(format, currReport);
-                    var viewPopupDg = $compile(viewPopup);
-                    $("body").append(viewPopupDg($scope));
+                    if($('.npsod-popup').length==0){
+                        var viewPopupDg = $compile(viewPopup);
+                        $("body").append(viewPopupDg($scope));
 
-                    var modal = $(".npsod-popup");
-                    modal.find("button.cancel-button").on('qv-activate', function () {
-                        modal.remove();
-                        if (angular.isDefined(pullTaskHandler)) {
-                            $interval.cancel(pullTaskHandler);
-                            pullTaskHandler = undefined;
-                        }
-                    });
-
-                    var pullTaskHandler = $interval(function () {
-                        getTasks(conn).then(function (response) {
-                            $scope.taskList = response.data.items;
-                            $scope.$apply();
+                        var modal = $(".npsod-popup");
+                        modal.find("button.cancel-button").on('qv-activate', function () {
+                            modal.remove();
+                            if (angular.isDefined(pullTaskHandler)) {
+                                $interval.cancel(pullTaskHandler);
+                                pullTaskHandler = undefined;
+                            }
                         });
-                    }, 1000);
 
-                    $scope.go2OverviewStage(conn);
+                        var pullTaskHandler = $interval(function () {
+                            getTasks(conn).then(function (response) {
+                                $scope.taskList = response.data.items;
+                                $scope.$apply();
+                            });
+                        }, 1000);
+
+                        $scope.go2OverviewStage(conn);
+                        
+                    }
                 };
 
                 $scope.getImg = getImg;
