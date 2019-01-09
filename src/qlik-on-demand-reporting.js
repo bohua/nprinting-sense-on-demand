@@ -31,7 +31,12 @@ function(
 
     var app = qlik.currApp();
     var currentSelections;
-    
+    var currentActions = {
+        export: {},
+        delete: {},
+        download: null,
+    };
+
     function getSelectionByApi() {
         var fp = [];
         currentSelections.map(function(selection) {
@@ -72,9 +77,16 @@ function(
         var conn = options.conn,
         report = options.report,
         format = options.format,
-        selections = getSelectionByApi();
+        df = Deferred();
 
-        return selections.then(function(allFieldSelections) {
+        if (currentActions.export[report]) {
+            // Aldready creating this report
+            df.reject();
+            return df.promise;
+        }
+
+        currentActions.export[report] = true;
+        getSelectionByApi().then(function(allFieldSelections) {
             return hlp.doGetConnections(conn.server, conn.app).then(function(response) {
                 var connectionId;
                 if(response.data) {
@@ -116,9 +128,17 @@ function(
                     xhrFields: {
                         withCredentials: true
                     }
+                }).then(function() {
+                    df.resolve();
                 });
             });
+        }).catch(function() {
+            df.reject();
+        }).finally(function() {
+            delete currentActions.export[report];
         });
+
+        return df.promise;
     }
 
     return {
@@ -141,7 +161,7 @@ function(
                 return $scope.object && $scope.object.getInteractionState() === 1;
             };
 
-            $scope.showDialog = function(attemptCount) {
+            $scope.showDialog = function() {
                 if (canInteract()) {
                     hlp.getLoginNtlm(conn.server).then(function () {
                         $scope.popupDg();
@@ -299,14 +319,29 @@ function(
                         };
 
                         $scope.deleteTask = function(taskId) {
+                            if (currentActions.delete[taskId]) {
+                                // Already deleting this task
+                                return;
+                            }
+                            currentActions.delete[taskId] = true;
                             hlp.doDeleteTask(conn.server, taskId).then(function() {
+                                delete currentActions.delete[taskId];
                                 $scope.go2OverviewStage();
                                 getTasks();
+                            }).catch(function () {
+                                delete currentActions.delete[taskId];
                             });
                         };
 
                         $scope.downloadTask = function(taskId) {
-                            hlp.downloadTask(conn.server, taskId);
+                            if (currentActions.download == taskId) {
+                                // The current download is for the given task
+                                return;
+                            }
+                            currentActions.download = taskId;
+                            hlp.downloadTask(conn.server, taskId).finally(function() {
+                                currentActions.download = null;
+                            });
                         };
 
                         $scope.cancel = function () {
