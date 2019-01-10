@@ -1,3 +1,10 @@
+/**
+ * @license
+ * Copyright (c) 2018 S-cubed Aps DK. All rights reserved.
+ * 
+ * Copyrights licensed under the terms of the MIT license.
+ * Original source <https://github.com/bohua/nprinting-sense-on-demand>
+ */
 define([
     "jquery",
     "qlik",
