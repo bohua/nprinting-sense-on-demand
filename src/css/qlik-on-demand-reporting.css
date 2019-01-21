@@ -76,12 +76,34 @@ img.npsod-img-list:hover{
 .print-on-demand .print-select-report .lui-list__item .lui-list__aside {
 	font-weight: bold;
 }
+
+.qlik-on-demand-reporting .qodr-loader-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 47vh;
+}
+
+.qlik-on-demand-reporting .qodr-loader-container .pp-loader {
+	height: 120px;
+	width: 120px;
+	opacity: 0.7;
+}
+
+.qlik-on-demand-reporting .qodr-loader-container .loading-label {
+	margin-top: 20px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .lui-dialog.qlik-on-demand-reporting {
 	max-height: 90%; 
 	max-width: 90%; 
 	min-height: 60%; 
 	min-width: 600px;	
 }
+
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
 	/* IE10+ CSS styles go here */
 	/* rule for IE: works like min-w and min-h */

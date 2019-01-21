@@ -43,7 +43,7 @@ function(
 
     function getSelectedValues(selection) {
         var df = Deferred(),
-        f = app.field(selection.fieldName).getData(),
+        f = app.field(selection.fieldName).getData({rows: selection.totalCount}),
         listener = function () {
             var isNumeric = false,
             selectedValues = f.rows.reduce(function (result, row) {
@@ -126,6 +126,7 @@ function(
         controller: ['$scope', '$element', '$interval', function($scope, $element, $interval) {
 
             $scope.downloadable = false;
+            $scope.setLoading = function () {};
 
             var conn = $scope.layout.npsod.conn;
             var pullTaskHandler = null;
@@ -136,16 +137,8 @@ function(
             };
 
             $scope.doExport = function() {
-                if(canInteract()) {
-                    var options = {
-                        conn: conn,
-                        report: conn.report,
-                        format: conn.exportFormat
-                    };
-
-                    doExport(options).then(function (response) {
-                        $scope.popupDg();
-                    });
+                if(canInteract()) {                   
+                    $scope.popupDg();
                 }
             };
 
@@ -179,14 +172,56 @@ function(
                 qvangular.getService( "luiDialog" ).show( {
                     template: viewPopup,
                     controller: ["$scope", "$element", "$interval", function($scope, $element, $interval) {
+                        
+                        var options = {
+                            conn: conn,
+                            report: conn.report,
+                            format: conn.exportFormat
+                        };
+                        var responseCompare;
+                        
+                        $scope.disableNewReport = true;
+                        $scope.message = '';
 
-                        $scope.stage = 'overview';
+                        function initExportSequence (options) {
+
+                            $scope.stage = '';
+
+                            var loadTimeout = setTimeout(function () {
+                                $scope.isLoading = true;
+                                $scope.showLoader = true;
+                                $scope.message = 'Fetching data..';
+                            }, 200);
+
+                            getTasks();
+                          
+                            return doExport(options).then(function () {
+                                clearTimeout(loadTimeout);
+                                $scope.isLoading = false;
+                                $scope.disableNewReport = false;
+                                $scope.stage = 'overview';
+                            }).catch(function () {
+                                clearTimeout(loadTimeout);
+                                $scope.isLoading = true;
+                                $scope.showLoader = false;
+                                $scope.message = 'Unable to connect to server.';
+                            });
+                        }
+
+                        function getTasks () {
+                            return hlp.doGetTasks(conn.server, conn.app).then(function(response) {
+                                if (responseCompare !== JSON.stringify(response.data.items)) {
+                                    responseCompare = JSON.stringify(response.data.items);
+                                    $scope.taskList = response.data.items;
+                                    $scope.$apply();
+                                }
+                            });
+                        }
+
+                        initExportSequence(options);
 
                         pullTaskHandler = $interval(function() {
-                            hlp.doGetTasks(conn.server, conn.app).then(function(response) {
-                                $scope.taskList = response.data.items;	
-                                $scope.$apply();
-                            });
+                            getTasks();
                         }, 1000);
 
                         $scope.go2OverviewStage = function() {
@@ -216,7 +251,7 @@ function(
                                 report: $scope.currReport.id,
                                 format: format
                             };
-                            doExport(options).then(function(){
+                            initExportSequence(options).then(function () {
                                 $scope.go2OverviewStage();
                             });
                         };
@@ -236,7 +271,8 @@ function(
                         };
                     }],
                     input: {
-                        stage: $scope.stage
+                        stage: $scope.stage,
+                        setLoading: $scope.setLoading
                     },
                     closeOnEscape: true,
 

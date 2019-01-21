@@ -4,6 +4,10 @@
 		<div class="lui-dialog__title">Export</div>
 	</div>
 	<div class="lui-dialog__body print-on-demand">
+		<div ng-if="isLoading" class="qodr-loader-container">
+			<div ng-if="showLoader" class="pp-loader qv-loader"></div>
+			<span class="loading-label">{{message}}</span>
+		</div>
 		<!-- Select Report Stage -->
 		<div ng-if="stage=='overview'">
 			<ul class="lui-list print-overview">
@@ -68,8 +72,8 @@
 	</div>
 	<div class="lui-dialog__footer">
 		<button class="cancel-button lui-button  lui-dialog__button" ng-click="cancel()">Close</button>
-		<button ng-if="stage=='overview'" type="button" class="lui-button  lui-dialog__button" ng-click="go2SelectReportStage()">New Report</button>
-		<button ng-if="stage!='overview'" class="cancel-button lui-button  lui-dialog__button" ng-click="go2OverviewStage()">Back to Tasks</button>
+		<button ng-if="stage=='overview'||disableNewReport" ng-disabled="disableNewReport" type="button" class="lui-button  lui-dialog__button" ng-click="go2SelectReportStage()">New Report</button>
+		<button ng-if="stage!='overview'&&!disableNewReport" class="cancel-button lui-button  lui-dialog__button" ng-click="go2OverviewStage()">Back to Tasks</button>
 		<iframe id="download" style="display:none;"></iframe>
 	</div>
 </div>
