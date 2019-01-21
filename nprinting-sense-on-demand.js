@@ -35,15 +35,14 @@ define([
 
         var app = qlik.currApp();
         var currentSelections;
-        
+       
+
+
         function getLoginNtlm(conn) {
             var URL = conn.server + 'api/v1/login/ntlm'
             return $.ajax({
                 url: URL,
                 method: 'GET',
-                headers: {
-                            'Access-Control-Allow-Origin': conn.server
-                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -76,9 +75,6 @@ define([
             $.ajax({
                 url: URL,
                 method: 'GET',
-                headers: {
-                            'Access-Control-Allow-Origin': conn.server
-                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -108,6 +104,9 @@ define([
 
         function getSelectionByApi() {
             var fp = [];
+            if(currentSelections === undefined){
+                return Promise.resolve([]);
+            }
             currentSelections.map(function (selection) {
                 fp.push(getSelectedValues(selection));
             });
@@ -246,9 +245,6 @@ define([
                         method: 'POST',
                         contentType: 'application/json',
                         crossDomain: true,
-                        headers: {
-                            'Access-Control-Allow-Origin': conn.server
-                        },
                         data: JSON.stringify(onDemandRequest),
                         xhrFields: {
                             withCredentials: true
@@ -264,10 +260,7 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
-                headers: {
-                            'Access-Control-Allow-Origin': conn.server
-                        },
-                xhrFields: {
+               xhrFields: {
                     withCredentials: true
                 }
             });
@@ -278,9 +271,6 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
-                headers: {
-                            'Access-Control-Allow-Origin': conn.server
-                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -293,9 +283,6 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
-                headers: {
-                            'Access-Control-Allow-Origin': conn.server
-                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -308,9 +295,6 @@ define([
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
-                headers: {
-                            'Access-Control-Allow-Origin': conn.server
-                        },
                 xhrFields: {
                     withCredentials: true
                 }
@@ -325,8 +309,7 @@ define([
             return $.ajax({
                 url: requestUrl,
                 headers: {
-                    'access-control-allow-headers': 'content-type',
-                    'Access-Control-Allow-Origin': conn.server
+                    'access-control-allow-headers': 'content-type'
                         },
                 method: 'DELETE',
                 xhrFields: {
@@ -430,11 +413,21 @@ define([
             controller: ['$scope', '$element', '$compile', '$interval', function ($scope, $element, $compile, $interval) {
                 //$scope.label = "Export";
                 $scope.downloadable = false;
-
                 var conn = $scope.layout.npsod.conn;
                 var currReport = null;
+                var buttonPosition = ($scope.layout.npsod.button && $scope.layout.npsod.button.position) ? $scope.layout.npsod.button.position: 'top';
+                $scope.buttonStyle = {'vertical-align': buttonPosition };
 
-                getLoginNtlm(conn);
+                $scope.objId = Math.floor(Math.random()*1000000);
+                var x = document.createElement("var");
+                x.id = $scope.objId;
+                document.body.appendChild(x);
+
+                 var vars = document.getElementsByTagName('var');
+                if(vars[0].id==$scope.objId){
+                    console.log('$scope.objId',$scope.objId);
+                    getLoginNtlm(conn);
+                }
 
                 $('.npsod-bar-btn').on('click', function () {
                     $scope.popupDg();
@@ -546,8 +539,12 @@ define([
                 innerObj.css('background', 'transparent');
                 outterObj.css('border', 'none');
                 outterObj.find('.lui-icon--expand ').remove();
-            }]
-
+            }],
+            paint: function ($element, layout) {
+                let $scope = this.$scope;
+                var buttonPosition = (layout.npsod.button && layout.npsod.button.position) ? layout.npsod.button.position: 'top';
+                $scope.buttonStyle = {'vertical-align': buttonPosition };
+                },
             /*
             paint: function($element) {
                 var nprintingBase = 'https://nprinting.s-cubed.local:4993/api/v1';

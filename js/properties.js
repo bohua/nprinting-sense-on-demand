@@ -134,6 +134,30 @@ var AppearanceSection = {
 			label: "Button Label",
 			type: "string",
 			expression: "optional"
-		}
+		},
+	buttonPosition: {
+        type: "string",
+        component: "buttongroup",
+        label: "Button position",
+        ref: "npsod.button.position",
+        options: [
+          {
+            value: "top",
+            label: "Top",
+            tooltip: "Top"
+          },
+          {
+            value: "middle",
+            label: "Middle",
+            tooltip: "Middle"
+          },
+          {
+            value: "bottom",
+            label: "Bottom",
+            tooltip: "Bottom"
+          }
+        ],
+        defaultValue: "top"
+      },
 	}
 };
