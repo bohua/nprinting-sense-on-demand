@@ -135,29 +135,48 @@ var AppearanceSection = {
 			type: "string",
 			expression: "optional"
 		},
-	buttonPosition: {
-        type: "string",
-        component: "buttongroup",
-        label: "Button position",
-        ref: "npsod.button.position",
-        options: [
-          {
-            value: "top",
-            label: "Top",
-            tooltip: "Top"
-          },
-          {
-            value: "middle",
-            label: "Middle",
-            tooltip: "Middle"
-          },
-          {
-            value: "bottom",
-            label: "Bottom",
-            tooltip: "Bottom"
-          }
-        ],
-        defaultValue: "top"
-      },
+		presentation : {
+				label : "Display",
+				items : {
+					buttonPosition: {
+						type: "string",
+						component: "buttongroup",
+						label: "Button position",
+						ref: "npsod.button.position",
+						options: [
+						  {
+							value: "top",
+							label: "Top",
+							tooltip: "Top"
+						  },
+						  {
+							value: "middle",
+							label: "Middle",
+							tooltip: "Middle"
+						  },
+						  {
+							value: "bottom",
+							label: "Bottom",
+							tooltip: "Bottom"
+						  }
+						],
+						defaultValue: "top"
+					},
+					DomId: {
+						type: "string",
+						label: "DOM Id",
+						ref: "npsod.button.DomId",
+						expression:"optional",
+						default:"[]"
+					},
+					CSSConditionalClass: {
+						type: "string",
+						label: "CSS Conditional Class",
+						ref: "npsod.button.CSSConditionalClass",
+						expression:"always",
+						defaultValue: ""
+					}
+				}
+			},
 	}
 };

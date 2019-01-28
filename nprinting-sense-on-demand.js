@@ -425,7 +425,6 @@ define([
 
                  var vars = document.getElementsByTagName('var');
                 if(vars[0].id==$scope.objId){
-                    console.log('$scope.objId',$scope.objId);
                     getLoginNtlm(conn);
                 }
 
@@ -524,7 +523,6 @@ define([
                 // create an object
                 var selState = app.selectionState();
                 var listener = function () {
-                    //console.log(selState);
                     currentSelections = selState.selections;
                 };
                 //bind the listener
@@ -544,6 +542,10 @@ define([
                 let $scope = this.$scope;
                 var buttonPosition = (layout.npsod.button && layout.npsod.button.position) ? layout.npsod.button.position: 'top';
                 $scope.buttonStyle = {'vertical-align': buttonPosition };
+                $scope.DomId = layout.npsod.button.DomId;
+                $scope.CSSConditionalClass = (layout.npsod.button.CSSConditionalClass || layout.npsod.button.CSSConditionalClass.length>0) ? layout.npsod.button.CSSConditionalClass : '';
+
+
                 },
             /*
             paint: function($element) {
