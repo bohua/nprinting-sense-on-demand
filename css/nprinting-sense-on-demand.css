@@ -54,4 +54,15 @@ img.npsod-img-list:hover{
 
 .npsod-export-btn {
 	width: 100%;
+	display: inline-block;
+}
+
+.npsod-canvas{
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+
+.npsod-btn-container{
+  display: table-cell;
 }
