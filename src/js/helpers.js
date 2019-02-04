@@ -151,7 +151,7 @@ define([],
 				xhrFields: {
 					withCredentials: true
 				}
-			});
+			}).error(function(){});
 		}
 }
   }

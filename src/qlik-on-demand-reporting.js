@@ -77,19 +77,21 @@ function(
         return selections.then(function(allFieldSelections) {				
             return hlp.doGetConnections(conn.server, conn.app).then(function(response) {
                 var connectionId;
-                if (response.data.totalItems == 1) {
-                    connectionId = response.data.items[0].id;
-                } else {
-                    for (var i = 0; i < response.data.items.length; i++) {
-                        var appId = response.data.items[i].appId;
-
-                        if (appId == conn.app) {
-                            connectionId = response.data.items[i].id;
-                            break;
+                if(response.data) {
+                    if (response.data.totalItems == 1) {
+                        connectionId = response.data.items[0].id;
+                    } else {
+                        for (var i = 0; i < response.data.items.length; i++) {
+                            var appId = response.data.items[i].appId;
+    
+                            if (appId == conn.app) {
+                                connectionId = response.data.items[i].id;
+                                break;
+                            }
                         }
                     }
                 }
-
+                
                 var requestUrl = hlp.doGetActionURL(conn.server, 'api/v1/ondemand/requests');
                 var onDemandRequest = {
                     type: 'report',
@@ -210,7 +212,7 @@ function(
 
                         function getTasks () {
                             return hlp.doGetTasks(conn.server, conn.app).then(function(response) {
-                                if (responseCompare !== JSON.stringify(response.data.items)) {
+                                if (response.data && responseCompare !== JSON.stringify(response.data.items)) {
                                     responseCompare = JSON.stringify(response.data.items);
                                     $scope.taskList = response.data.items;
                                     $scope.$apply();
