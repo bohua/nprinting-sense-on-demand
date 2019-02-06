@@ -92,6 +92,10 @@ function(
                     }
                 }
                 
+                if (conn.server === "") {
+                    throw "Connection string is missing";
+                }
+
                 var requestUrl = hlp.doGetActionURL(conn.server, 'api/v1/ondemand/requests');
                 var onDemandRequest = {
                     type: 'report',
@@ -102,7 +106,7 @@ function(
                     selections: allFieldSelections,
                     // here's the sense connection on which we want to apply selections
                     connectionId: connectionId//'5c0af3f6-e65d-40d2-8f03-6025f8196ff'
-                };
+                };            
 
                 return $.ajax({
                     url: requestUrl,
