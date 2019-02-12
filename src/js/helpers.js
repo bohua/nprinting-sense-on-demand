@@ -1,10 +1,13 @@
-define(["qvangular", "jquery", "core.utils/deferred"],
-	function(qvangular, $, Deferred){
+define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
+	function(qlik, qvangular, $, Deferred){
     'use strict';
 
 	  return {
       isServerSet: function (data) {
         return data.npsod.conn.server.length > 0;
+      },
+      isAppSet: function (data) {
+        return data.npsod.conn.app.length > 0;
       },
       doGetActionURL: function (server, url) {
         var B = server;
@@ -26,20 +29,75 @@ define(["qvangular", "jquery", "core.utils/deferred"],
         }
 
         return self.getLoginNtlm(data.npsod.conn.server).then(function () {
-          return $.ajax({
+          var tasks = [];
+          tasks.push($.ajax({
             url: self.getActionURL(data, 'api/v1/apps'),
             method: 'GET',
             xhrFields: {
               withCredentials: true
             }
-          }).then(function(response) {
-            return response.data.items.map(function(app) {
+          }));
+          tasks.push(self.getConnections(data.npsod.conn.server, null));
+          return Promise.all(tasks).then(function (responses) {
+            var result = [];
+            var appsResponse = responses.shift();
+            var connections = responses.shift();
+            if (!appsResponse || !connections) {
+              return [];
+            }
+
+            // Add those apps that also has a Connection
+            appsResponse.data.items.forEach(function (app) {
+              if (connections.some(function (connection) { return connection.appId === app.id })) {
+                result.push({
+                    value: app.id,
+                    label: app.name.length > 50 ? app.name.slice(0, 47) + '...' : app.name
+                  });
+              }
+            });
+            return result;
+          });
+        });
+      },
+
+      getConnectionIds: function (data) {
+        if (!this.isAppSet(data)) {
+          return [];
+        }
+
+        return this.getConnections(data.npsod.conn.server, data.npsod.conn.app)
+          .then(function (connections) {
+            return connections.map(function (connection) {
               return {
-                value: app.id,
-                label: app.name.length > 50 ? app.name.slice(0,50) + '...' : app.name
+                value: connection.id,
+                label: connection.name.length > 50 ? connection.name.slice(0, 47) + '...' : connection.name
               }
             });
           });
+      },
+
+      // Returns all NPrinting Connections that are associated with the current qApp
+      getConnections: function(server, appId) {
+        var url = 'api/v1/connections';
+        if (appId) {
+          url += '?appId=' + appId;
+        }
+        return $.ajax({
+          url: this.doGetActionURL(server, url),
+          method: 'GET',
+          xhrFields: {
+            withCredentials: true
+          }
+        }).then(function(response) {
+          var result = [];
+          var qApp = qlik.currApp(this);
+          var qAppPattern = new RegExp('.+appid=' + qApp.id + ';.+');
+          response.data.items.forEach(function (connection) {
+            if (qAppPattern.test(connection.connectionString)) {
+              result.push(connection);
+            }
+          });
+          return result;
         });
       },
 
@@ -55,12 +113,11 @@ define(["qvangular", "jquery", "core.utils/deferred"],
       },
 
     getReports: function (data) {
-      var self = this;
-      if(self.isServerSet(data) == false || data.npsod.conn.app.length < 1){
+      if(!this.isServerSet(data) || !this.isAppSet(data)) {
         return [];
       }
 
-      return self.doGetReportlist(data.npsod.conn.server, data.npsod.conn.app).then(function(response) {
+      return this.doGetReportlist(data.npsod.conn.server, data.npsod.conn.app).then(function(response) {
         return response.data.items.map(function(report) {
           return {
             value: report.id,
@@ -162,18 +219,5 @@ define(["qvangular", "jquery", "core.utils/deferred"],
       }).attr('src', requestUrl);
       return df.promise;
     },
-
-    doGetConnections: function (server, app) {
-      var requestUrl = this.doGetActionURL(server, 'api/v1/connections?appId=' + app);
-
-			return $.ajax({
-				url: requestUrl,
-				method: 'GET',
-				xhrFields: {
-					withCredentials: true
-				}
-			});
-		}
-}
   }
-);
+});

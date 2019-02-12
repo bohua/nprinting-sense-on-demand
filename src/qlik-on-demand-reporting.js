@@ -87,27 +87,27 @@ function(
 
         currentActions.export[report] = true;
         getSelectionByApi().then(function(allFieldSelections) {
-            return hlp.doGetConnections(conn.server, conn.app).then(function(response) {
-                var connectionId;
-                if(response.data) {
-                    if (response.data.totalItems == 1) {
-                        connectionId = response.data.items[0].id;
-                    } else {
-                        for (var i = 0; i < response.data.items.length; i++) {
-                            var appId = response.data.items[i].appId;
-    
-                            if (appId == conn.app) {
-                                connectionId = response.data.items[i].id;
-                                break;
-                            }
-                        }
-                    }
+            if (!conn.server) {
+                throw "Server Connection is not specified";
+            }
+
+            var connectionIdTask = [];
+            if (!conn.id) {
+                if (!conn.app) {
+                    throw "App is not specified";
                 }
 
-                if (conn.server === "") {
-                    throw "Connection string is missing";
-                }
+                // Connection id will not be specified for users who used the previous version,
+                // so to make sure we don't break anything, get the first valid Connection
+                // (as before, but now we're making sure it is a valid Connection)
+                connectionIdTask.push(hlp.getConnections(conn.server, conn.app));
+            }
 
+            return Promise.all(connectionIdTask).then(function (result) {
+                var connections = result.shift();
+                if (connections && connections.length > 0) {
+                    conn.id = connections[0].id;
+                }
                 var requestUrl = hlp.doGetActionURL(conn.server, 'api/v1/ondemand/requests');
                 var onDemandRequest = {
                     type: 'report',
@@ -116,10 +116,8 @@ function(
                         outputFormat: format
                     },
                     selections: allFieldSelections,
-                    // here's the sense connection on which we want to apply selections
-                    connectionId: connectionId//'5c0af3f6-e65d-40d2-8f03-6025f8196ff'
+                    connectionId: conn.id
                 };
-
                 return $.ajax({
                     url: requestUrl,
                     method: 'POST',
@@ -132,8 +130,8 @@ function(
                     df.resolve();
                 });
             });
-        }).catch(function() {
-            df.reject();
+        }).catch(function(err) {
+            df.reject(err);
         }).finally(function() {
             delete currentActions.export[report];
         });
@@ -189,7 +187,7 @@ function(
             // create an object
             var selState = app.selectionState();
             var listener = function () {
-                    currentSelections = selState.selections;
+                currentSelections = selState.selections;
             };
             //bind the listener
             selState.OnData.bind(listener);
@@ -233,8 +231,8 @@ function(
                                         pullTaskHandler = null;
                                     }
                                 }
-                            }).catch(function () {
-                                setNotLoading();
+                            }).catch(function (err) {
+                                setNotLoading(err);
                             });
                         }
 
@@ -249,8 +247,9 @@ function(
                             return doExport(options).then(function () {
                                 $scope.go2OverviewStage();
                                 getTasks();
-                            }).catch(function () {
-                                setNotLoading();
+                            }).catch(function (err) {
+                                $scope.go2OverviewStage();
+                                setNotLoading(err);
                             });
                         }
 
@@ -271,11 +270,10 @@ function(
                             $scope.showLoader = false;
 
                             if (err) {
-                                $scope.disableNewReport = true;
                                 if (typeof err === 'string') {
+                                    $scope.disableNewReport = true;
                                     $scope.message = 'Unable to connect to server.';
-                                } else if ('responseJSON' in err
-                                        && err.responseJSON.error.message === 'Wrong parameters') {
+                                } else if (err.status === 400) {
                                     $scope.message = 'Incomplete configuration.';
                                 } else {
                                     $scope.message = 'Unknown error.';
@@ -313,9 +311,7 @@ function(
                                 report: $scope.currReport.id,
                                 format: format
                             };
-                            initExportSequence(options).then(function () {
-                                $scope.go2OverviewStage();
-                            });
+                            initExportSequence(options);
                         };
 
                         $scope.deleteTask = function(taskId) {
