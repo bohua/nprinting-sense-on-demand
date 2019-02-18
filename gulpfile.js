@@ -75,7 +75,7 @@ gulp.task('build',['clean', 'qext', 'css'], function () {
 			output:{
 				comments: saveLicense
 			}
-		}))
+		})).on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
 		.pipe(gulp.dest(DIST));
 });
 
