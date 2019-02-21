@@ -74,7 +74,7 @@ function(
         format = options.format,
         selections = getSelectionByApi();
 
-        return selections.then(function(allFieldSelections) {				
+        return selections.then(function(allFieldSelections) {
             return hlp.doGetConnections(conn.server, conn.app).then(function(response) {
                 var connectionId;
                 if(response.data) {
@@ -91,7 +91,7 @@ function(
                         }
                     }
                 }
-                
+
                 if (conn.server === "") {
                     throw "Connection string is missing";
                 }
@@ -106,7 +106,7 @@ function(
                     selections: allFieldSelections,
                     // here's the sense connection on which we want to apply selections
                     connectionId: connectionId//'5c0af3f6-e65d-40d2-8f03-6025f8196ff'
-                };            
+                };
 
                 return $.ajax({
                     url: requestUrl,
@@ -136,15 +136,16 @@ function(
 
             var conn = $scope.layout.npsod.conn;
             var pullTaskHandler = null;
-            hlp.getLoginNtlm($scope.layout);
 
             function canInteract() {
-                return $scope.object && $scope.object.getInteractionState() === 1;           
+                return $scope.object && $scope.object.getInteractionState() === 1;
             };
 
-            $scope.doExport = function() {
-                if(canInteract()) {                   
-                    $scope.popupDg();
+            $scope.showDialog = function(attemptCount) {
+                if (canInteract()) {
+                    hlp.getLoginNtlm(conn.server).then(function () {
+                        $scope.popupDg();
+                    });
                 }
             };
 
@@ -153,7 +154,7 @@ function(
                 $scope.FirstTime = true;
                 var clickHandler = 'ontouchstart' in document.documentElement ? "touchstart" : "click";
                 var Btn = $($element).find("button.lui-button");
-                Btn.bind(clickHandler, $scope.doExport);
+                Btn.bind(clickHandler, $scope.showDialog);
             }
 
             // Hacking the layout
@@ -173,62 +174,97 @@ function(
             //bind the listener
             selState.OnData.bind(listener);
 
-
             $scope.popupDg = function () {
-                qvangular.getService( "luiDialog" ).show( {
+                qvangular.getService( "luiDialog" ).show({
                     template: viewPopup,
-                    controller: ["$scope", "$element", "$interval", function($scope, $element, $interval) {
-                        
-                        var options = {
-                            conn: conn,
-                            report: conn.report,
-                            format: conn.exportFormat
-                        };
-                        var responseCompare;
-                        
+                    controller: ["$scope", "$interval", function($scope, $interval) {
+
                         $scope.disableNewReport = true;
                         $scope.message = '';
+                        var responseCompare = '';
+                        var loadTimeout = null;
 
-                        function initExportSequence (options) {
-
-                            $scope.stage = '';
-
-                            var loadTimeout = setTimeout(function () {
-                                $scope.isLoading = true;
-                                $scope.showLoader = true;
-                                $scope.message = 'Fetching data..';
-                            }, 200);
-
-                            getTasks();
-                          
-                            return doExport(options).then(function () {
-                                clearTimeout(loadTimeout);
-                                $scope.isLoading = false;
-                                $scope.disableNewReport = false;
-                                $scope.stage = 'overview';
-                            }).catch(function () {
-                                clearTimeout(loadTimeout);
-                                $scope.isLoading = true;
-                                $scope.showLoader = false;
-                                $scope.message = 'Unable to connect to server.';
-                            });
-                        }
-
+                        getTasks();
                         function getTasks () {
+                            setLoading();
+
                             return hlp.doGetTasks(conn.server, conn.app).then(function(response) {
-                                if (response.data && responseCompare !== JSON.stringify(response.data.items)) {
-                                    responseCompare = JSON.stringify(response.data.items);
-                                    $scope.taskList = response.data.items;
-                                    $scope.$apply();
+                                $scope.go2OverviewStage();
+                                setNotLoading(null);
+                                if (!response.data) {
+                                    return;
                                 }
+
+                                var responseString = JSON.stringify(response.data.items);
+                                if (responseString !== responseCompare) {
+                                    responseCompare = responseString;
+                                    $scope.taskList = response.data.items;
+
+                                    $scope.$apply();
+
+                                    if (anyRunningTasks()) {
+                                        if (!pullTaskHandler) {
+                                            pullTaskHandler = $interval(function() {
+                                                getTasks();
+                                            }, 1000);
+                                        }
+                                    } else if (pullTaskHandler) {
+                                        $interval.cancel(pullTaskHandler);
+                                        pullTaskHandler = null;
+                                    }
+                                }
+                            }).catch(function () {
+                                setNotLoading();
                             });
                         }
 
-                        initExportSequence(options);
+                        function anyRunningTasks() {
+                            return $scope.taskList.some(function (item) { return item.status === "running" });
+                        }
 
-                        pullTaskHandler = $interval(function() {
-                            getTasks();
-                        }, 1000);
+                        function initExportSequence(options) {
+                            $scope.stage = '';
+                            setLoading();
+
+                            return doExport(options).then(function () {
+                                $scope.go2OverviewStage();
+                                getTasks();
+                            }).catch(function () {
+                                setNotLoading();
+                            });
+                        }
+
+                        function setLoading() {
+                            if (!loadTimeout) {
+                                $scope.disableNewReport = true;
+                                loadTimeout = setTimeout(function () {
+                                    $scope.isLoading = true;
+                                    $scope.showLoader = true;
+                                    $scope.message = 'Fetching data...';
+                                }, 200);
+                            }
+                        }
+
+                        function setNotLoading(err) {
+                            clearTimeout(loadTimeout);
+                            $scope.isLoading = false;
+                            $scope.showLoader = false;
+
+                            if (err) {
+                                $scope.disableNewReport = true;
+                                if (typeof err === 'string') {
+                                    $scope.message = 'Unable to connect to server.';
+                                } else if ('responseJSON' in err
+                                        && err.responseJSON.error.message === 'Wrong parameters') {
+                                    $scope.message = 'Incomplete configuration.';
+                                } else {
+                                    $scope.message = 'Unknown error.';
+                                }
+                            } else {
+                                $scope.disableNewReport = false;
+                                $scope.message = '';
+                            }
+                        }
 
                         $scope.go2OverviewStage = function() {
                             $scope.stage = 'overview';
@@ -261,13 +297,14 @@ function(
                                 $scope.go2OverviewStage();
                             });
                         };
-        
+
                         $scope.deleteTask = function(taskId) {
                             hlp.doDeleteTask(conn.server, taskId).then(function() {
                                 $scope.go2OverviewStage();
+                                getTasks();
                             });
                         };
-        
+
                         $scope.downloadTask = function(taskId) {
                             hlp.downloadTask(conn.server, taskId);
                         };
@@ -283,9 +320,9 @@ function(
                     closeOnEscape: true,
 
                 }).closed.then(function() {
-                    if (angular.isDefined(pullTaskHandler)) {
+                    if (pullTaskHandler) {
                         $interval.cancel(pullTaskHandler);
-                        pullTaskHandler = undefined;
+                        pullTaskHandler = null;
                     }
                 });
             };

@@ -1,7 +1,7 @@
-define([],
-	function(){
-	  'use strict';
-	
+define(["qvangular"],
+	function(qvangular){
+    'use strict';
+
 	  return {
       isServerSet: function (data) {
         return data.npsod.conn.server.length > 0;
@@ -11,7 +11,7 @@ define([],
         B.trim();
         var L = B.slice(-1);
         if(L != "/"){
-          B += "/";			
+          B += "/";
         }
         return B + url;
       },
@@ -21,25 +21,28 @@ define([],
 
       getApps: function (data) {
         var self = this;
-        if(self.isServerSet(data) == false){
+        if (!self.isServerSet(data)) {
           return [];
         }
-        return $.ajax({
-          url: self.getActionURL(data, 'api/v1/apps'),
-          method: 'GET',
-          xhrFields: {
-            withCredentials: true
-          }
-        }).then(function(response) {
-          return response.data.items.map(function(app) {
-            return {
-              value: app.id,
-              label: app.name.length > 50 ? app.name.slice(0,50) + '...' : app.name
+
+        return self.getLoginNtlm(data.npsod.conn.server).then(function () {
+          return $.ajax({
+            url: self.getActionURL(data, 'api/v1/apps'),
+            method: 'GET',
+            xhrFields: {
+              withCredentials: true
             }
+          }).then(function(response) {
+            return response.data.items.map(function(app) {
+              return {
+                value: app.id,
+                label: app.name.length > 50 ? app.name.slice(0,50) + '...' : app.name
+              }
+            });
           });
         });
       },
-      
+
       doGetReportlist: function(server, app) {
         var requestUrl = this.doGetActionURL(server, 'api/v1/reports' + '?appId=' + app + '&sort=+title');
         return $.ajax({
@@ -50,7 +53,6 @@ define([],
           }
         });
       },
-    
 
     getReports: function (data) {
       var self = this;
@@ -95,22 +97,37 @@ define([],
       });
     },
 
-    getLoginNtlm: function (data) {
-      var self = this;
-      if(self.isServerSet(data) == false){
-        return false;
+    getLoginNtlm: function (server, attemptCount) {
+      if (!attemptCount) {
+        attemptCount = 0;
       }
-
+      var self = this;
       return $.ajax({
-        url: self.getActionURL(data, 'api/v1/login/ntlm'),
+        url: self.doGetActionURL(server, 'api/v1/login/ntlm'),
         method: 'GET',
         xhrFields: {
           withCredentials: true
         }
+      }).catch(function (err) {
+        if (err.status === 401 || err.status === 403) {
+          if (attemptCount > 3) {
+              // No more attempts
+              var qvAlertDialog = qvangular.getService('qvAlertDialog');
+              qvAlertDialog.show({
+                  title: "Unauthorized",
+                  message: "User could not be authenticated.",
+                  closeOnEscape: false
+              });
+          } else {
+              // Try again
+              return self.getLoginNtlm(server, ++attemptCount);
+          }
+        }
+        throw err;
       });
     },
 
-    doGetTasks: function(server, app){
+    doGetTasks: function(server, app) {
       var requestUrl = this.doGetActionURL(server, 'api/v1/ondemand/requests' + '?appId=' + app + '&sort=-created');
       return $.ajax({
         url: requestUrl,
