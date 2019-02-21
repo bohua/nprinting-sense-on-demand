@@ -27,7 +27,10 @@ jobs:
             --detect.project.name="nprinting-sense-on-demand"
       - run:
           name: Build
-          command: npm run build:zip
+          command: |
+            npm run build:zip
+            sudo chmod +x ./.circleci/verify-files.sh
+            ./.circleci/verify-files.sh
       - persist_to_workspace:
           root: ~/qlik-on-demand-reporting
           paths:
