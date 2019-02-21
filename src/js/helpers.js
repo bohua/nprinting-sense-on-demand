@@ -1,5 +1,5 @@
-define(["qvangular"],
-	function(qvangular){
+define(["qvangular", "jquery", "core.utils/deferred"],
+	function(qvangular, $, Deferred){
     'use strict';
 
 	  return {
@@ -155,10 +155,14 @@ define(["qvangular"],
     },
 
     downloadTask: function (server, taskId){
-      var requestUrl = this.doGetActionURL(server,'api/v1/ondemand/requests/' + taskId + '/result');
-			document.getElementById('download').src = requestUrl;
+      var df = Deferred();
+      var requestUrl = this.doGetActionURL(server, 'api/v1/ondemand/requests/' + taskId + '/result');
+      $('#download').on('load', function () {
+        df.resolve();
+      }).attr('src', requestUrl);
+      return df.promise;
     },
-    
+
     doGetConnections: function (server, app) {
       var requestUrl = this.doGetActionURL(server, 'api/v1/connections?appId=' + app);
 
