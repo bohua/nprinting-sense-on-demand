@@ -8,12 +8,12 @@
 			<div ng-if="showLoader" class="pp-loader qv-loader"></div>
 			<span class="loading-label">{{message}}</span>
 		</div>
-		<!-- Select Report Stage -->
+		<!-- Overview -->
 		<div ng-if="stage=='overview'">
 			<ul class="lui-list print-overview">
 				<li class="lui-list__item" ng-repeat="task in taskList">
 					<span class="lui-list__text">
-						<span class="task-title" title={{task.title}}>{{task.title.length > 50 ? task.title.slice(0,50) + '...' : task.title}} - </span>({{task.outputFormat}}) - 
+						<span class="task-title" title={{task.title}}>{{task.title}} - </span>({{task.outputFormat}}) - 
 						<drm-format-date x-date="task.created" x-skeleton="yMMMdjm"></drm-format-date>
 					</span>
 					<span class="lui-list__aside">

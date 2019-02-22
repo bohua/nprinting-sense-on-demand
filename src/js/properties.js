@@ -8,7 +8,11 @@ define(["./helpers"], function (hlp) {
 				ref: "npsod.conn.server",
 				label: "Server Connection",
 				type: "string",
-				expression: false
+				expression: false,
+				change: function(data) {
+					data.npsod.conn.app = "";
+					data.npsod.conn.id = "";
+				}
 			},
 			app: {
 				type: "string",
@@ -17,6 +21,15 @@ define(["./helpers"], function (hlp) {
 				ref: "npsod.conn.app",
 				options: function(data) {
 					return hlp.getApps(data);
+				}
+			},
+			connection: {
+				type: "string",
+				component: "dropdown",
+				label: "Choose Connection",
+				ref: "npsod.conn.id",
+				options: function(data) {
+					return hlp.getConnectionIds(data);
 				}
 			}
 		}
