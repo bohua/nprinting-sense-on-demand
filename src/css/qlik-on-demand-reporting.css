@@ -77,7 +77,7 @@ img.npsod-img-list:hover{
 	font-weight: bold;
 }
 
-.qlik-on-demand-reporting .qodr-loader-container {
+.qlik-on-demand-reporting .qodr-message-container {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -85,16 +85,16 @@ img.npsod-img-list:hover{
 	height: 47vh;
 }
 
-.qlik-on-demand-reporting .qodr-loader-container .pp-loader {
+.qlik-on-demand-reporting .qodr-message-container .pp-loader {
 	height: 120px;
 	width: 120px;
 	opacity: 0.7;
 }
 
-.qlik-on-demand-reporting .qodr-loader-container .loading-label {
+.qlik-on-demand-reporting .qodr-message-container .message-label {
 	margin-top: 20px;
-    font-size: 16px;
-    font-weight: bold;
+	font-size: 16px;
+	font-weight: bold;
 }
 
 .lui-dialog.qlik-on-demand-reporting {

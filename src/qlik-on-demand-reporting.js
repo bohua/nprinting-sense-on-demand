@@ -81,7 +81,12 @@ function(
 
         if (currentActions.export[report]) {
             // Aldready creating this report
-            df.reject();
+            df.reject({message: '', status: 1});
+            return df.promise;
+        }
+
+        if (!report || !format) {
+            df.reject({message: 'Missing template or format', status: 400});
             return df.promise;
         }
 
@@ -150,7 +155,6 @@ function(
         controller: ['$scope', '$element', '$interval', function($scope, $element, $interval) {
 
             $scope.downloadable = false;
-            $scope.setLoading = function () {};
 
             var conn = $scope.layout.npsod.conn;
             var pullTaskHandler = null;
@@ -161,9 +165,7 @@ function(
 
             $scope.showDialog = function() {
                 if (canInteract()) {
-                    hlp.getLoginNtlm(conn.server).then(function () {
-                        $scope.popupDg();
-                    });
+                    $scope.popupDg();
                 }
             };
 
@@ -197,18 +199,15 @@ function(
                     template: viewPopup,
                     controller: ["$scope", "$interval", function($scope, $interval) {
 
-                        $scope.disableNewReport = true;
-                        $scope.message = '';
+                        $scope.disableNewReport = false;
+                        $scope.stage = '';
+                        $scope.loadingMessage = '';
+                        $scope.errorMessage = '';
+                        $scope.loadingCount = 0;
                         var responseCompare = '';
-                        var loadTimeout = null;
 
-                        getTasks();
                         function getTasks () {
-                            setLoading();
-
                             return hlp.doGetTasks(conn.server, conn.app).then(function(response) {
-                                $scope.go2OverviewStage();
-                                setNotLoading(null);
                                 if (!response.data) {
                                     return;
                                 }
@@ -218,8 +217,8 @@ function(
                                     responseCompare = responseString;
                                     $scope.taskList = response.data.items;
 
-                                    $scope.$apply();
-
+                                    // Start polling the tasks for updates until there are no
+                                    // running tasks (which means there will be no further updates)
                                     if (anyRunningTasks()) {
                                         if (!pullTaskHandler) {
                                             pullTaskHandler = $interval(function() {
@@ -232,100 +231,100 @@ function(
                                     }
                                 }
                             }).catch(function (err) {
-                                setNotLoading(err);
+                                onError(err);
                             });
                         }
 
                         function anyRunningTasks() {
-                            return $scope.taskList.some(function (item) { return item.status === "running" });
-                        }
-
-                        function initExportSequence(options) {
-                            $scope.stage = '';
-                            setLoading();
-
-                            return doExport(options).then(function () {
-                                $scope.go2OverviewStage();
-                                getTasks();
-                            }).catch(function (err) {
-                                $scope.go2OverviewStage();
-                                setNotLoading(err);
+                            return $scope.taskList.some(function (item) {
+                                return item.status === "running"
                             });
                         }
 
-                        function setLoading() {
-                            if (!loadTimeout) {
+                        function onCreateNewReport() {
+                            $scope.errorMessage = '';
+                        }
+
+                        function onLoading(message) {
+                            $scope.loadingMessage = message;
+                            $scope.stage = 'loading';
+                        };
+
+                        function onError(err) {
+                            if (err.status === 0 || err.status === 404) {
                                 $scope.disableNewReport = true;
-                                loadTimeout = setTimeout(function () {
-                                    $scope.isLoading = true;
-                                    $scope.showLoader = true;
-                                    $scope.message = 'Fetching data...';
-                                }, 200);
-                            }
-                        }
-
-                        function setNotLoading(err) {
-                            clearTimeout(loadTimeout);
-                            $scope.isLoading = false;
-                            $scope.showLoader = false;
-
-                            if (err) {
-                                if (typeof err === 'string') {
-                                    $scope.disableNewReport = true;
-                                    $scope.message = 'Unable to connect to server.';
-                                } else if (err.status === 400) {
-                                    $scope.message = 'Incomplete configuration.';
-                                } else {
-                                    $scope.message = 'Unknown error.';
-                                }
+                                $scope.errorMessage = 'Unable to connect to server.';
+                            } else if (err.status === 400) {
+                                $scope.errorMessage = 'Incomplete configuration.';
                             } else {
-                                $scope.disableNewReport = false;
-                                $scope.message = '';
+                                $scope.errorMessage = 'Unknown error.';
                             }
+                            $scope.go2OverviewStage(false);
                         }
 
-                        $scope.go2OverviewStage = function() {
-                            $scope.stage = 'overview';
+                        $scope.go2OverviewStage = function(refresh) {
+                            if (refresh) {
+                                onLoading('Refreshing data...');
+                                getTasks().then(function () {
+                                    $scope.stage = 'overview';
+                                });
+                            } else {
+                                $scope.stage = 'overview';
+                            }
+                        };
+
+                        $scope.go2SelectReportStage = function() {
+                            onCreateNewReport();
+                            onLoading('Fetching reports...');
+                            hlp.doGetReportlist(conn.server, conn.app).then(function(response) {
+                                $scope.reportList = response.data;
+                                $scope.stage = 'selectReport';
+                                $scope.$apply();
+                            }).catch(function (err) {
+                                onError(err);
+                            });
                         };
 
                         $scope.go2selectFormatStage = function(report) {
+                            onLoading('Fetching formats...');
                             hlp.doGetExportFormats(conn.server, report.id).then(function(response) {
                                 $scope.currReport = report;
                                 $scope.outputFormats = response.data.outputFormats;
                                 $scope.stage = 'selectFormat';
                                 $scope.$apply();
-                            });
-                        };
-
-                        $scope.go2SelectReportStage = function() {
-                            hlp.doGetReportlist(conn.server, conn.app).then(function(response) {
-                                $scope.reportList = response.data;
-                                $scope.stage = 'selectReport';
-                                $scope.$apply();
+                            }).catch(function (err) {
+                                onError(err);
                             });
                         };
 
                         $scope.exportReport = function(format) {
+                            onLoading('Initializing report...');
                             var options = {
                                 conn: conn,
                                 report: $scope.currReport.id,
                                 format: format
                             };
-                            initExportSequence(options);
+                            doExport(options).then(function () {
+                                $scope.go2OverviewStage(true);
+                            }).catch(function (err) {
+                                onError(err);
+                            });
                         };
 
-                        $scope.deleteTask = function(taskId) {
-                            if (currentActions.delete[taskId]) {
+                        $scope.deleteTask = function(task) {
+                            if (currentActions.delete[task.id]) {
                                 // Already deleting this task
                                 return;
                             }
-                            currentActions.delete[taskId] = true;
-                            hlp.doDeleteTask(conn.server, taskId).then(function() {
-                                delete currentActions.delete[taskId];
-                                $scope.go2OverviewStage();
+                            currentActions.delete[task.id] = true;
+                            var previousStatus = task.status;
+                            task.status = 'deleting';
+                            hlp.doDeleteTask(conn.server, task.id).then(function() {
+                                delete currentActions.delete[task.id];
                                 getTasks();
                             }).catch(function () {
-                                delete currentActions.delete[taskId];
+                                task.status = previousStatus;
+                                delete currentActions.delete[task.id];
                             });
                         };
 
@@ -343,10 +342,17 @@ function(
                         $scope.cancel = function () {
                             $scope.close();
                         };
+
+                        // Authenticate the user when opening
+                        onLoading('Connecting...');
+                        hlp.getLoginNtlm(conn.server).then(function () {
+                            $scope.go2OverviewStage(true);
+                        }).catch(function (err) {
+                            onError(err);
+                        });
                     }],
                     input: {
-                        stage: $scope.stage,
-                        setLoading: $scope.setLoading
+                        stage: $scope.stage
                     },
                     closeOnEscape: true,
 
