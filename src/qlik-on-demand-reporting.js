@@ -199,7 +199,7 @@ function(
                     template: viewPopup,
                     controller: ["$scope", "$interval", function($scope, $interval) {
 
-                        $scope.disableNewReport = false;
+                        $scope.disableNewReport = true;
                         $scope.stage = '';
                         $scope.loadingMessage = '';
                         $scope.errorMessage = '';
@@ -267,6 +267,7 @@ function(
                                 onLoading('Refreshing data...');
                                 getTasks().then(function () {
                                     $scope.stage = 'overview';
+                                    $scope.disableNewReport = false;
                                 });
                             } else {
                                 $scope.stage = 'overview';
@@ -346,7 +347,18 @@ function(
                         // Authenticate the user when opening
                         onLoading('Connecting...');
                         hlp.getLoginNtlm(conn.server).then(function () {
-                            $scope.go2OverviewStage(true);
+
+                            // Temporarily enable create-on-open behavior while waiting
+                            // for new design
+                            var options = {
+                                conn: conn,
+                                report: conn.report,
+                                format: conn.exportFormat
+                            };
+                            onLoading('Initializing report...');
+                            return doExport(options).then(function () {
+                                $scope.go2OverviewStage(true);
+                            });
                         }).catch(function (err) {
                             onError(err);
                         });
