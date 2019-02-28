@@ -42,7 +42,7 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
             var result = [];
             var appsResponse = responses.shift();
             var connections = responses.shift();
-            if (!appsResponse || !connections) {
+            if (!appsResponse || !connections || connections.length == 0) {
               return [];
             }
 
@@ -102,7 +102,7 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
       },
 
       doGetReportlist: function(server, app) {
-        var requestUrl = this.doGetActionURL(server, 'api/v1/reports' + '?appId=' + app + '&sort=+title');
+        var requestUrl = this.doGetActionURL(server, 'api/v1/reports?sort=+title&appId=' + app);
         return $.ajax({
           url: requestUrl,
           method: 'GET',
@@ -113,7 +113,7 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
       },
 
     getReports: function (data) {
-      if(!this.isServerSet(data) || !this.isAppSet(data)) {
+      if (!this.isServerSet(data) || !this.isAppSet(data)) {
         return [];
       }
 
@@ -121,13 +121,13 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
         return response.data.items.map(function(report) {
           return {
             value: report.id,
-            label: report.title.length > 50 ? report.title.slice(0,50) + '...' : report.title
+            label: report.title.length > 50 ? report.title.slice(0, 47) + '...' : report.title
           }
         });
       });
     },
     doGetExportFormats: function (server, reportId){
-      var requestUrl = this.doGetActionURL(server, 'api/v1/reports' + '/' + reportId);
+      var requestUrl = this.doGetActionURL(server, 'api/v1/reports/' + reportId);
       return $.ajax({
         url: requestUrl,
         method: 'GET',
@@ -142,7 +142,7 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
       if(self.isServerSet(data) == false || data.npsod.conn.report.length < 1){
         return [];
       }
-      
+
       return self.doGetExportFormats(data.npsod.conn.server, data.npsod.conn.report).
       then(function(response) {
         return response.data.outputFormats.map(function(format) {
@@ -185,30 +185,43 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
     },
 
     doGetTasks: function(server, app) {
-      var requestUrl = this.doGetActionURL(server, 'api/v1/ondemand/requests' + '?appId=' + app + '&sort=-created');
-      return $.ajax({
+      var df = Deferred();
+      if (!app) {
+        df.reject({message: 'Must specify app', status: 400});
+        return df.promise;
+      }
+
+      var requestUrl = this.doGetActionURL(server, 'api/v1/ondemand/requests?sort=-created&appId=' + app);
+      $.ajax({
         url: requestUrl,
-				method: 'GET',
-				xhrFields: {
-					withCredentials: true
-				}
-			});
+        method: 'GET',
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(res) {
+          df.resolve(res);
+        },
+        error: function(err) {
+          df.reject(err);
+        }
+      });
+      return df.promise;
     },
-    
+
     doDeleteTask: function(server, taskId){
       var requestUrl = this.doGetActionURL(server, 'api/v1/ondemand/requests/' + taskId);
       $.support.cors = true;
-      
-			return $.ajax({
-				url: requestUrl,
-				headers:{
-					'access-control-allow-headers':'content-type'
-				},
-				method: 'DELETE',
-				xhrFields: {
-					withCredentials: true
-				}
-			});
+
+      return $.ajax({
+        url: requestUrl,
+        headers:{
+          'access-control-allow-headers':'content-type'
+        },
+        method: 'DELETE',
+        xhrFields: {
+          withCredentials: true
+        }
+      });
     },
 
     downloadTask: function (server, taskId){

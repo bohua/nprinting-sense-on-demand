@@ -4,12 +4,17 @@
 		<div class="lui-dialog__title">Export</div>
 	</div>
 	<div class="lui-dialog__body print-on-demand">
-		<div ng-if="isLoading" class="qodr-loader-container">
-			<div ng-if="showLoader" class="pp-loader qv-loader"></div>
-			<span class="loading-label">{{message}}</span>
+		<!-- Error -->
+		<div ng-if="errorMessage" class="qodr-message-container">
+			<span class="message-label">{{errorMessage}}</span>
+		</div>
+		<!-- Loading Data -->
+		<div ng-if="stage=='loading'" class="qodr-message-container">
+			<div class="pp-loader qv-loader"></div>
+			<span class="message-label">{{loadingMessage}}</span>
 		</div>
 		<!-- Overview -->
-		<div ng-if="stage=='overview'">
+		<div ng-if="stage=='overview' && !errorMessage">
 			<ul class="lui-list print-overview">
 				<li class="lui-list__item" ng-repeat="task in taskList">
 					<span class="lui-list__text">
@@ -22,7 +27,10 @@
 						<span ng-if=" task.status=='running' || task.status=='queued'">
 							<div class="pp-loader qv-loader"></div>
 						</span>
-						<span ng-click="deleteTask(task.id)" style="padding-left: 10px"class="lui-icon  lui-icon--bin"></span>
+						<span ng-if="task.status!='deleting'" ng-click="deleteTask(task)" style="padding-left: 10px" class="lui-icon  lui-icon--bin"></span>
+						<span ng-if=" task.status=='deleting'">
+							<div class="pp-loader qv-loader"></div>
+						</span>
 					</span>
 				</li>
 			</ul>
@@ -73,7 +81,7 @@
 	<div class="lui-dialog__footer">
 		<button class="cancel-button lui-button  lui-dialog__button" ng-click="cancel()">Close</button>
 		<button ng-if="stage=='overview'||disableNewReport" ng-disabled="disableNewReport" type="button" class="lui-button  lui-dialog__button" ng-click="go2SelectReportStage()">New Report</button>
-		<button ng-if="stage!='overview'&&!disableNewReport" class="cancel-button lui-button  lui-dialog__button" ng-click="go2OverviewStage()">Back to Tasks</button>
+		<button ng-if="stage!='overview'&&!disableNewReport" ng-disabled="stage=='loading'" class="cancel-button lui-button  lui-dialog__button" ng-click="go2OverviewStage(false)">Back to Tasks</button>
 		<iframe id="download" style="display:none;"></iframe>
 	</div>
 </div>
