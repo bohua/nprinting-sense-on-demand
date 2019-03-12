@@ -224,9 +224,19 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
       });
     },
 
-    downloadTask: function (server, taskId){
-      var df = Deferred();
+    downloadTask: function (server, taskId) {
       var requestUrl = this.doGetActionURL(server, 'api/v1/ondemand/requests/' + taskId + '/result');
+      var df = Deferred();
+
+      if ((navigator.vendor && navigator.vendor.indexOf('Apple') > -1)
+          || /(Trident|MSIE)/.test(navigator.userAgent)) {
+        // Using either an Apple browser or Internet Explorer, which are bad at handling downloads
+        // in an iframe. So just open another tab instead
+        window.open(requestUrl);
+        df.resolve();
+        return df.promise;
+      }
+
       $('#download').on('load', function () {
         df.resolve();
       }).attr('src', requestUrl);
