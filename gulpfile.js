@@ -8,14 +8,15 @@ var pkg = require('./package.json');
 
 var DIST = './dist',
 	SRC = './src',
-	NAME = pkg.name;
+	NAME = pkg.name,
+	VERSION = process.env.VERSION || 'local-dev';
 
 gulp.task('qext', function () {
 	var qext = {
 		name: 'On-demand reporting',
 		type: 'visualization',
 		description: pkg.description,
-		version: pkg.version,
+		version: VERSION,
 		icon: 'print',
 		preview: './images/preview.png',
 		keywords: 'qlik-sense, visualization',
@@ -83,26 +84,7 @@ gulp.task('zip', ['build'], function () {
 	var zip = require('gulp-zip');
 
 	return gulp.src(DIST + '/**/*')
-		.pipe(zip(`${NAME}_${pkg.version}.zip`))
-		.pipe(gulp.dest(DIST));
-});
-
-gulp.task('debug', ['clean', 'qext', 'css'], function () {
-	return gulp.src([
-		SRC + '/**/*.css', 
-		SRC + '/**/*.png', 
-		SRC + '/**/*.js',
-		SRC + '/**/*.html',
-		DIST + '/**/*.qext'
-	])
-		.pipe(gulp.dest(DIST));
-});
-
-gulp.task('debug-zip', ['debug'], function () {
-	var zip = require('gulp-zip');
-
-	return gulp.src(DIST + '/**/*')
-		.pipe(zip(`${NAME}_${pkg.version}.zip`))
+		.pipe(zip(`${NAME}_${VERSION}.zip`))
 		.pipe(gulp.dest(DIST));
 });
 
