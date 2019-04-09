@@ -120,7 +120,7 @@ define([
                 listener = function () {
                     var isNumeric = false,
                         selectedValues = f.rows.reduce(function (result, row) {
-                            if (row.qState === 'S') {
+                            if (row.qState === 'S' || row.qState === 'L') {
                                 if (!isNumeric && !isNaN(row.qNum)) {
                                     isNumeric = true;
                                 }
