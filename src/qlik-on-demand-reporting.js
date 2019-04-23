@@ -47,29 +47,44 @@ function(
     }
 
     function getSelectedValues(selection) {
-        var df = Deferred(),
-        f = app.field(selection.fieldName).getData({rows: selection.totalCount}),
-        listener = function () {
-            var isNumeric = false,
-            selectedValues = f.rows.reduce(function (result, row) {
-                if (row.qState === 'S') {
-                    if (!isNumeric && !isNaN(row.qNum)) {
+        var df = Deferred();
+        var field = app.field(selection.fieldName);
+        var selectedValues = [];
+        var rowIndex = 0;
+        var isNumeric = false;
+        var listener = function () {
+            while (rowIndex < field.rows.length) {
+                if (field.rows[rowIndex].qState === 'S') {
+                    if (isNumeric) {
+                        selectedValues.push(field.rows[rowIndex].qNum);
+                    } else if (!isNaN(field.rows[rowIndex].qNum)) {
                         isNumeric = true;
+                        selectedValues.push(field.rows[rowIndex].qNum);
+                    } else {
+                        selectedValues.push(field.rows[rowIndex].qText);
                     }
-                    result.push(isNumeric ? row.qNum : row.qText);
                 }
-                return result;
-            }, []);
-            
-            df.resolve({
-                fieldName: selection.fieldName,
-                selectedCount: selection.selectedCount,
-                selectedValues: selectedValues,
-                isNumeric: isNumeric
-            });
-            f.OnData.unbind(listener);
+                rowIndex++;
+            }
+
+            if (rowIndex < selection.totalCount - 1
+                && selectedValues.length < selection.selectedCount) {
+                // There are more rows and we haven't processed all selections yet
+                field.getMoreData();
+            } else {
+                // Processed all field values
+                df.resolve({
+                    fieldName: selection.fieldName,
+                    selectedCount: selection.selectedCount,
+                    selectedValues: selectedValues,
+                    isNumeric: isNumeric
+                });
+                field.OnData.unbind(listener);
+            }
         };
-        f.OnData.bind(listener);
+
+        field.OnData.bind(listener);
+        field.getData();
         return df.promise;
     }
 
