@@ -15,7 +15,7 @@ gulp.task('qext', function () {
 	var qext = {
 		name: 'On-demand reporting',
 		type: 'visualization',
-		description: pkg.description,
+		description: pkg.description + '\nVersion: ' + VERSION,
 		version: VERSION,
 		icon: 'print',
 		preview: './images/preview.png',
