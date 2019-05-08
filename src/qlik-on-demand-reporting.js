@@ -13,6 +13,7 @@ define([
     "text!./css/qlik-on-demand-reporting.css",
     "text!./template/view-main-single.html",
     "text!./template/view-popup.html",
+    'text!./template/view-senseid-mismatch-popup.html',
     "qvangular",
     "core.utils/deferred"
 ],
@@ -24,6 +25,7 @@ function(
     css,
     viewMain,
     viewPopup,
+    senseIdMismatchPopup,
     qvangular,
     Deferred
 ) {
@@ -36,6 +38,40 @@ function(
         delete: {},
         download: null,
     };
+
+    // Makes sure this is synced with the current Qlik Sense app
+    function verifySenseApp($scope) {
+        if (app.model.properties.published) {
+            // This app is published, so we assume it is working. Only bad scenario is if the user
+            // has published a duplicated app, in which case they will find out why it doesn't work
+            // in the report-dialog instead
+            return;
+        }
+
+        app.getObjectProperties($scope.layout.qInfo.qId).then(function (model) {
+            var isDirty = false;
+            if (!model.properties.npsod.conn.qAppId) {
+                // No previous app id, so assume this is the first time and update value
+                model.properties.npsod.conn.qAppId = app.id;
+                isDirty = true;
+            } else if (model.properties.npsod.conn.qAppId != app.id) {
+                // Different from previous, this means the app has been duplicated,
+                // so show message and update value
+                qvangular.getService("luiDialog").show({
+                    template: senseIdMismatchPopup,
+                    closeOnEscape: true,
+                    closeOnOutside: true,
+                  });
+                model.properties.npsod.conn.qAppId = app.id;
+                isDirty = true;
+            }
+            if (isDirty) {
+                model.setProperties(model.properties).then(function () {
+                    app.doSave();
+                });
+            }
+        });
+    }
 
     function getSelectionByApi() {
         var fp = [];
@@ -169,6 +205,8 @@ function(
         template: viewMain,
         controller: ['$scope', '$element', '$interval', function($scope, $element, $interval) {
 
+            verifySenseApp($scope);
+
             $scope.downloadable = false;
 
             var conn = $scope.layout.npsod.conn;
@@ -269,8 +307,14 @@ function(
                             if (err.status === 0 || err.status === 404) {
                                 $scope.disableNewReport = true;
                                 $scope.errorMessage = 'Unable to connect to server.';
+                            } else if (err.status === 1) {
+                                $scope.disableNewReport = true;
+                                $scope.errorMessage = 'No NPrinting connections configured for this Sense app.';
                             } else if (err.status === 400) {
                                 $scope.errorMessage = 'Incomplete configuration.';
+                            } else if (err.status === 403) {
+                                $scope.disableNewReport = true;
+                                $scope.errorMessage = 'Server access blocked by server.';
                             } else {
                                 $scope.errorMessage = 'Unknown error.';
                             }
@@ -368,10 +412,20 @@ function(
                             $scope.close();
                         };
 
-                        // Authenticate the user when opening
+                        // Make sure the Sense app is correct for this setup
                         onLoading('Connecting...');
-                        hlp.getLoginNtlm(conn.server).then(function () {
-                            $scope.go2OverviewStage(true);
+                        hlp.getConnections(conn.server, conn.app).then(function (connections) {
+                            if (connections.length === 0) {
+                                onError({status: 1});
+                                return;
+                            }
+
+                            // Authenticate the user when opening
+                            hlp.getLoginNtlm(conn.server).then(function () {
+                                $scope.go2OverviewStage(true);
+                            }).catch(function (err) {
+                                onError(err);
+                            });
                         }).catch(function (err) {
                             onError(err);
                         });
