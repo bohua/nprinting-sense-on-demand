@@ -214,7 +214,7 @@ function(
                     template: viewPopup,
                     controller: ["$scope", "$interval", function($scope, $interval) {
 
-                        $scope.disableNewReport = true;
+                        $scope.disableNewReport = false;
                         $scope.stage = '';
                         $scope.loadingMessage = '';
                         $scope.errorMessage = '';
@@ -282,7 +282,6 @@ function(
                                 onLoading('Refreshing data...');
                                 getTasks().then(function () {
                                     $scope.stage = 'overview';
-                                    $scope.disableNewReport = false;
                                 });
                             } else {
                                 $scope.stage = 'overview';
@@ -314,11 +313,21 @@ function(
                         };
 
                         $scope.exportReport = function(format) {
+                            var optReport;
+                            var optFormat;
+                            if (format) {
+                                optReport = $scope.currReport.id;
+                                optFormat = format;
+                            } else {
+                                optReport = conn.report;
+                                optFormat = conn.exportFormat;
+                            }
+
                             onLoading('Initializing report...');
                             var options = {
                                 conn: conn,
-                                report: $scope.currReport.id,
-                                format: format
+                                report: optReport,
+                                format: optFormat
                             };
                             doExport(options).then(function () {
                                 $scope.go2OverviewStage(true);
@@ -362,18 +371,7 @@ function(
                         // Authenticate the user when opening
                         onLoading('Connecting...');
                         hlp.getLoginNtlm(conn.server).then(function () {
-
-                            // Temporarily enable create-on-open behavior while waiting
-                            // for new design
-                            var options = {
-                                conn: conn,
-                                report: conn.report,
-                                format: conn.exportFormat
-                            };
-                            onLoading('Initializing report...');
-                            return doExport(options).then(function () {
-                                $scope.go2OverviewStage(true);
-                            });
+                            $scope.go2OverviewStage(true);
                         }).catch(function (err) {
                             onError(err);
                         });
