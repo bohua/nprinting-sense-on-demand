@@ -335,8 +335,8 @@ function(
                         $scope.go2SelectReportStage = function() {
                             onCreateNewReport();
                             onLoading('Fetching reports...');
-                            hlp.doGetReportlist(conn.server, conn.app).then(function(response) {
-                                $scope.reportList = response.data;
+                            hlp.doGetReportlist(conn.server, conn.app).then(function(reports) {
+                                $scope.reportList = reports;
                                 $scope.stage = 'selectReport';
                                 $scope.$apply();
                             }).catch(function (err) {
