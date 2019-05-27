@@ -41,9 +41,9 @@
 				<li class="lui-list__header">
 					<span class="lui-list__text">Select a report to choose desired format</span>
 				</li>
-				<li class="lui-list__item" ng-repeat="report in reportList.items" ng-click="go2selectFormatStage(report)">
+				<li class="lui-list__item" ng-repeat="report in reportList" ng-click="go2selectFormatStage(report)">
 					<span class="lui-list__text">
-						<h4 class="list-group-item-heading bold" title={{report.title}}>{{report.title.length > 50 ? report.title.slice(0,50) + '...' : report.title}}</h4>
+						<h4 class="list-group-item-heading bold" title={{report.title}}>{{report.title.length > 50 ? report.title.slice(0,47) + '...' : report.title}}</h4>
 						<p class="list-group-item-text">Description: {{report.description}}</p>
 						<p class="list-group-item-text">Type: {{report.type}}</p>
 						<p class="list-group-item-text">Created: <drm-format-date x-date="report.created" x-skeleton="yMMMdjm"></drm-format-date></p>

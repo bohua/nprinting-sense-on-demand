@@ -45,7 +45,7 @@ define(["./helpers"], function (hlp) {
 				label: "Choose Report",
 				ref: "npsod.conn.report",
 				options: function(data) {
-					return hlp.getReports(data);
+					return hlp.getReportsForDropdown(data);
 				}
 			},
 			exportFormat: {
@@ -54,7 +54,7 @@ define(["./helpers"], function (hlp) {
 				label: "Default Export Format",
 				ref: "npsod.conn.exportFormat",
 				options: function(data) {
-					return hlp.getExportFormats(data);
+					return hlp.getExportFormatsForDropdown(data);
 				}
 			}
 		}
