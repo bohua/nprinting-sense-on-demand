@@ -82,45 +82,61 @@ function(
         return Deferred.all(fp);
     }
 
-    function getSelectedValues(selection) {
+    function getSelectedValues(fieldSelection) {
         var df = Deferred();
-        var field = app.field(selection.fieldName);
-        var selectedValues = [];
-        var rowIndex = 0;
+
+        // Fetch actual data for all selections of the field. Need to do this since the shown values
+        // aren't the actual data and might not be a working selected in some cases.
+        // For instance, dates.
         var isNumeric = false;
-        var listener = function () {
-            while (rowIndex < field.rows.length) {
-                if (field.rows[rowIndex].qState === 'S') {
-                    if (isNumeric) {
-                        selectedValues.push(field.rows[rowIndex].qNum);
-                    } else if (!isNaN(field.rows[rowIndex].qNum)) {
-                        isNumeric = true;
-                        selectedValues.push(field.rows[rowIndex].qNum);
-                    } else {
-                        selectedValues.push(field.rows[rowIndex].qText);
-                    }
-                }
-                rowIndex++;
+        var fetchSelections = function (selection) {
+            if (selection.length >= fieldSelection.selectedCount) {
+                // Found all selections
+                return selection;
             }
 
-            if (rowIndex < selection.totalCount - 1
-                && selectedValues.length < selection.selectedCount) {
-                // There are more rows and we haven't processed all selections yet
-                field.getMoreData();
-            } else {
-                // Processed all field values
-                df.resolve({
-                    fieldName: selection.fieldName,
-                    selectedCount: selection.selectedCount,
-                    selectedValues: selectedValues,
-                    isNumeric: isNumeric
-                });
-                field.OnData.unbind(listener);
-            }
+            // Still some selections left to fetch. Can only fetch 10k per call.
+            return app.createCube({
+                qDimensions: [{
+                    qDef: {
+                        qFieldDefs: [fieldSelection.fieldName]
+                    }
+                }],
+                qInitialDataFetch : [{
+                    qTop : selection.length,
+                    qLeft : 0,
+                    qHeight : 10000,
+                    qWidth : 1
+                }]
+            }).then(function (model) {
+                // Extract element numbers from matrix
+                var matrix = model.layout.qHyperCube.qDataPages[0].qMatrix;
+                app.destroySessionObject(model.layout.qInfo.qId);
+                for (var i = 0; i < matrix.length; i++) {
+                    var selectionData = matrix[i].map(function (item) {
+                        if (isNumeric) {
+                            return item.qNum;
+                        }
+                        if (!isNaN(item.qNum)) {
+                            isNumeric = true;
+                            return item.qNum;
+                        }
+                        return item.qText;
+                    });
+                    selection = selection.concat(selectionData);
+                }
+                return fetchSelections(selection);
+            });
         };
 
-        field.OnData.bind(listener);
-        field.getData();
+        fetchSelections([]).then(function (selections) {
+            df.resolve({
+                fieldName: fieldSelection.fieldName,
+                selectedCount: selections.length,
+                selectedValues: selections,
+                isNumeric: isNumeric
+            });
+        });
         return df.promise;
     }
 
