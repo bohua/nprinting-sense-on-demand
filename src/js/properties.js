@@ -92,7 +92,7 @@ define(["./helpers"], function (hlp) {
 				component: 'text'
 			},
 			paragraph1: {
-				label: 'An extension that allows a user to generate an NPrinting report on demand.',
+				label: 'A control that allows a user to generate an NPrinting report on demand.',
 				component: 'text'
 			},
 			paragraph2: {
