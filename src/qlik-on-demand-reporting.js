@@ -428,23 +428,23 @@ function(
                             $scope.close();
                         };
 
-                        // Make sure the Sense app is correct for this setup
-                        onLoading('Connecting...');
-                        hlp.getConnections(conn.server, conn.app).then(function (connections) {
-                            if (connections.length === 0) {
-                                onError({status: 1});
-                                return;
-                            }
-
-                            // Authenticate the user when opening
-                            hlp.getLoginNtlm(conn.server).then(function () {
+                         // Authenticate the user when opening
+                         hlp.getLoginNtlm(conn.server).then(function () {
+                            // Make sure the Sense app is correct for this setup
+                            onLoading('Connecting...');
+                            hlp.getConnections(conn.server, conn.app).then(function (connections) {
+                                if (connections.length === 0) {
+                                    onError({status: 1});
+                                    return;
+                                }
                                 $scope.go2OverviewStage(true);
+                                
                             }).catch(function (err) {
                                 onError(err);
                             });
                         }).catch(function (err) {
                             onError(err);
-                        });
+                        });    
                     }],
                     input: {
                         stage: $scope.stage
