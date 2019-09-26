@@ -31,7 +31,7 @@ function(
 ) {
     $("<style>").html(css).appendTo("head");
 
-    var app = qlik.currApp();
+    var app;
     var currentSelections;
     var currentActions = {
         export: {},
@@ -221,6 +221,7 @@ function(
         template: viewMain,
         controller: ['$scope', '$element', '$interval', function($scope, $element, $interval) {
 
+            app = hlp.qApp = qlik.currApp($scope);
             verifySenseApp($scope);
 
             $scope.downloadable = false;

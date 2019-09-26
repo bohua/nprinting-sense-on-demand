@@ -108,8 +108,7 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
           }
         }).then(function(response) {
           var result = [];
-          var qApp = qlik.currApp(self);
-          var qAppPattern = new RegExp('.+appid=' + qApp.id + ';.+');
+          var qAppPattern = new RegExp('.+appid=' + self.qApp.id + ';.+');
           response.data.items.forEach(function (connection) {
             if (qAppPattern.test(connection.connectionString)) {
               result.push(connection);
