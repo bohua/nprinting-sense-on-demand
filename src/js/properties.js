@@ -1,12 +1,13 @@
 define(["./helpers"], function (hlp) {
-	
+
 	var connection = {
 		type: "items",
 		label: "NPrinting Connection",
+		grouped: true,
 		items: {
 			server: {
 				ref: "npsod.conn.server",
-				label: "Server Connection",
+				label: "NPrinting server URL",
 				type: "string",
 				expression: false,
 				change: function(data) {
@@ -14,23 +15,86 @@ define(["./helpers"], function (hlp) {
 					data.npsod.conn.id = "";
 				}
 			},
-			app: {
-				type: "string",
-				component: "dropdown",
-				label: "Choose App",
-				ref: "npsod.conn.app",
-				options: function(data) {
-					return hlp.getApps(data);
+			relation: {
+				type: "items",
+				items: {
+					app: {
+						type: "string",
+						component: "dropdown",
+						label: "NPrinting app",
+						ref: "npsod.conn.app",
+						options: function(data, handler, obj) {
+							return hlp.getApps(data, handler.app, obj.model);					
+						}
+					},
+					connection: {
+						type: "string",
+						component: "dropdown",
+						label: "NPrinting connection",
+						ref: "npsod.conn.id",
+						options: function(data, handler, obj) {
+
+							var model = obj.model;
+							var app = handler.app;
+
+							return model.getProperties().then(function(props) {
+
+								var connQAppId = props.npsod.conn.qApp;
+
+								// Check if saved app id corresponds to current app id.
+								if (handler.app.id !== connQAppId && typeof connQAppId !== "undefined") {
+									
+									props.npsod.conn.qApp = handler.app.id;
+									props.useConnectionFilter = false;
+
+									return model.setProperties(props).then(function() {
+										return model.getLayout().then(function(layout) {
+											return hlp.getConnectionIds(layout, app, model);
+										});
+									});
+								} else {
+									return hlp.getConnectionIds(data, app, model);
+								}								
+							});
+						}
+					},
+					idMissMatch: {
+						show: function(data) {
+							return !data.connectionIdMatch;
+						},
+						component: "text",
+						translation: "This connection is not configured with the current Qlik Sense app. If selections in the target do not match, you may get broken reports.",
+						style: "hint",
+						banner: true,
+						icon: "lui-icon--warning"
+					}
 				}
 			},
-			connection: {
-				type: "string",
-				component: "dropdown",
-				label: "Choose Connection",
-				ref: "npsod.conn.id",
-				options: function(data) {
-					return hlp.getConnectionIds(data);
-				}
+			options: {
+				type: "items",
+				items: {
+					filterConnections: {
+						label: "App/Connection filter",
+						type: "boolean",
+						ref: "useConnectionFilter",
+						component: "switch",
+						options: [
+						{
+							value: true,
+							translation: "On",
+						},
+						{
+							value: false,
+							translation: "Off",
+						},
+						],
+					},
+					allowShowDetailsMessage: {
+						component: "text",
+						translation: "Turn off this filter if you want to see connections that are not associated with the current Qlik Sense app.",
+						style: "hint",
+					},
+				},
 			}
 		}
 	};

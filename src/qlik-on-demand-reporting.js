@@ -13,7 +13,6 @@ define([
     "text!./css/qlik-on-demand-reporting.css",
     "text!./template/view-main-single.html",
     "text!./template/view-popup.html",
-    'text!./template/view-senseid-mismatch-popup.html',
     "qvangular",
     "core.utils/deferred"
 ],
@@ -25,7 +24,6 @@ function(
     css,
     viewMain,
     viewPopup,
-    senseIdMismatchPopup,
     qvangular,
     Deferred
 ) {
@@ -38,40 +36,6 @@ function(
         delete: {},
         download: null,
     };
-
-    // Makes sure this is synced with the current Qlik Sense app
-    function verifySenseApp($scope) {
-        if (app.model.properties.published) {
-            // This app is published, so we assume it is working. Only bad scenario is if the user
-            // has published a duplicated app, in which case they will find out why it doesn't work
-            // in the report-dialog instead
-            return;
-        }
-
-        app.getObjectProperties($scope.layout.qInfo.qId).then(function (model) {
-            var isDirty = false;
-            if (!model.properties.npsod.conn.qAppId) {
-                // No previous app id, so assume this is the first time and update value
-                model.properties.npsod.conn.qAppId = app.id;
-                isDirty = true;
-            } else if (model.properties.npsod.conn.qAppId != app.id) {
-                // Different from previous, this means the app has been duplicated,
-                // so show message and update value
-                qvangular.getService("luiDialog").show({
-                    template: senseIdMismatchPopup,
-                    closeOnEscape: true,
-                    closeOnOutside: true,
-                  });
-                model.properties.npsod.conn.qAppId = app.id;
-                isDirty = true;
-            }
-            if (isDirty) {
-                model.setProperties(model.properties).then(function () {
-                    app.doSave();
-                });
-            }
-        });
-    }
 
     function getSelectionByApi() {
         var fp = [];
@@ -221,12 +185,10 @@ function(
         template: viewMain,
         controller: ['$scope', '$element', '$interval', function($scope, $element, $interval) {
 
-            app = hlp.qApp = qlik.currApp($scope);
-            verifySenseApp($scope);
-
             $scope.downloadable = false;
 
-            var conn = $scope.layout.npsod.conn;
+            var app = qlik.currApp($scope);
+            var model = $scope.object.model;
             var pullTaskHandler = null;
 
             function canInteract() {
@@ -235,9 +197,38 @@ function(
 
             $scope.showDialog = function() {
                 if (canInteract()) {
-                    $scope.popupDg();
+                    $scope.object.model.getLayout().then(function(layout){
+                        $scope.popupDg(layout.npsod.conn);
+                    });
                 }
             };
+
+            if ($scope.object.layout.permissions && $scope.object.layout.permissions.update) {
+                model.getLayout().then(function(layout) {
+                    model.getProperties().then(function(props) {
+                        var isDirty = false;
+                        // Added new property for enable/disable connection filter.
+                        if (typeof layout.useConnectionFilter == "undefined") {
+                            isDirty = true;
+                            props.useConnectionFilter = true;
+                        }
+                        // Add new  property for sense app id.
+                        if (layout.npsod.conn.qApp === "" || typeof layout.npsod.conn.qApp === "undefined") {
+                            isDirty = true;
+                            props.npsod.conn.qApp = app.id;
+                        }
+                        // If connection is not set it could not missmatch.
+                        if (layout.npsod.conn.id === "") {
+                            isDirty = true;
+                            props.connectionIdMatch = true;
+                        }
+                        // Save if updated properties.
+                        if (isDirty) {
+                            model.setProperties(props);
+                        }
+                    });
+                });
+            }
 
             // Workaround for Apple touch devices, iPad etc
             if (typeof $scope.FirstTime == "undefined") {
@@ -264,7 +255,7 @@ function(
             //bind the listener
             selState.OnData.bind(listener);
 
-            $scope.popupDg = function () {
+            $scope.popupDg = function (conn) {
                 qvangular.getService( "luiDialog" ).show({
                     template: viewPopup,
                     controller: ["$scope", "$interval", function($scope, $interval) {
@@ -433,7 +424,7 @@ function(
                          hlp.getLoginNtlm(conn.server).then(function () {
                             // Make sure the Sense app is correct for this setup
                             onLoading('Connecting...');
-                            hlp.getConnections(conn.server, conn.app).then(function (connections) {
+                            hlp.getConnections(conn.server, conn.app, null, null, null, app, model).then(function (connections) {
                                 if (connections.length === 0) {
                                     onError({status: 1});
                                     return;
