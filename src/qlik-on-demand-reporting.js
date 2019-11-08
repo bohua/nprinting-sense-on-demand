@@ -187,7 +187,7 @@ function(
 
             $scope.downloadable = false;
 
-            var app = qlik.currApp($scope);
+            app = qlik.currApp($scope);
             var model = $scope.object.model;
             var pullTaskHandler = null;
 
