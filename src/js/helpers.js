@@ -379,9 +379,22 @@ define(["qlik", "qvangular", "jquery", "core.utils/deferred"],
           return df.promise;
         }
 
-        $('#download').on('load', function () {
+        var download = $('#download');
+        var ifr = $('<iframe>');
+        
+        ifr.on('load', function () {
           df.resolve();
-        }).attr('src', requestUrl);
+        });
+
+        // Remove iframes created by previous downloads.
+        // All iframes will be removed when dialog is closed as well.
+        if (download.children().length > 0) {
+          download.empty();
+        }
+
+        download.append(ifr);
+        ifr.attr('src', requestUrl);
+        
         return df.promise;
       },
     }
