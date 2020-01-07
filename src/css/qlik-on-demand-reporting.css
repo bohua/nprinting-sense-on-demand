@@ -112,3 +112,9 @@ img.npsod-img-list:hover{
 		width: 600px;
 	}
 }
+
+@media screen and (max-width: 640px), screen and (max-height: 480px) {
+	.lui-dialog.qlik-on-demand-reporting {
+		min-width: 320px;
+	}
+}
