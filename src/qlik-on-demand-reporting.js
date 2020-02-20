@@ -266,6 +266,7 @@ function(
                         $scope.errorMessage = '';
                         $scope.loadingCount = 0;
                         var responseCompare = '';
+                        var disableClick = false;
 
                         function getTasks () {
                             return hlp.doGetTasks(conn.server, conn.app).then(function(response) {
@@ -406,14 +407,16 @@ function(
                         };
 
                         $scope.downloadTask = function(taskId) {
-                            if (currentActions.download == taskId) {
+                            if (disableClick && currentActions.download === taskId) {
                                 // The current download is for the given task
                                 return;
                             }
                             currentActions.download = taskId;
-                            hlp.downloadTask(conn.server, taskId).finally(function() {
-                                currentActions.download = null;
-                            });
+                            disableClick = true;
+                            setTimeout(function() {
+                                disableClick = false;
+                            }, 1500);
+                            hlp.downloadTask(conn.server, taskId);
                         };
 
                         $scope.cancel = function () {
