@@ -83,6 +83,6 @@
 		<button ng-if="stage=='overview' || disableNewReport" ng-disabled="disableNewReport" type="button" class="lui-button  lui-dialog__button" ng-click="exportReport()">Quick Report</button>
 		<button ng-if="stage=='overview' || disableNewReport" ng-disabled="disableNewReport" type="button" class="lui-button  lui-dialog__button" ng-click="go2SelectReportStage()">New Report</button>
 		<button ng-if="stage!='overview' && !disableNewReport" ng-disabled="stage=='loading'" class="cancel-button lui-button  lui-dialog__button" ng-click="go2OverviewStage(false)">Back to Tasks</button>
-		<iframe id="download" style="display:none;"></iframe>
+		<div id="download" style="display:none;"></div>
 	</div>
 </div>
