@@ -1,0 +1,64 @@
+<div class="qv-modal-container qui-modalbackground-centered qs-e-dim npsod-popup">
+	<div class="qui-delayedModal" style="max-height: 90%; max-width: 90%; min-height: 60%; min-width: 600px;">
+	<header class="dm-header">Export</header>
+	<main class="dm-main" ng-class="{scroll: stage=='overview'}">
+	<div class="bootstrap_inside">
+		<!-- Select Report Stage -->
+		<div ng-if="stage=='overview'">
+			<ul class="list-group npsod-list-group">
+				<li class="list-group-item npsod-task-list-item" ng-repeat="task in taskList">
+					<h4 class="list-group-item-heading bold">{{task.title}} <small>{{task.created}}</small></h4>
+					
+					<span class="glyphicon glyphicon-remove-circle npsod-list-menu-icon pointer" ng-click="deleteTask(task.id)"></span>
+					<span ng-if="task.status=='completed'" class="npsod-list-menu-icon glyphicon glyphicon-save pointer" ng-click="downloadTask(task.id)"></span>
+					<img class="npsod-list-loading-icon" ng-src="{{getImg('LOADING')}}" ng-if="task.status=='running'||task.status=='queued'">
+				</li>
+			</ul>
+		</div>
+		<!-- Select Report Stage -->
+		<div ng-if="stage=='selectReport'" class="list-group npsod-list-group">
+			<div class="media list-group-item pointer" ng-repeat="report in reportList.items" ng-click="go2selectFormatStage(report)">
+				<div class="media-left media-middle">
+					<a>
+						<img class="media-object npsod-img-header" ng-src="{{getImg(report.type)}}">
+					</a>
+				</div>
+				<div class="media-body">
+					<h4 class="list-group-item-heading bold">{{report.title}}</h4>
+					<p class="list-group-item-text">Description: {{report.description}}</p>
+					<p class="list-group-item-text">Type: {{report.type}}</p>
+					<p class="list-group-item-text">Created: {{report.created}}</p>
+				</div>
+			</div>
+		</div>
+		<!-- Select Format Stage -->
+		<div ng-if="stage=='selectFormat'">
+			<img ng-src="{{getImg(format)}}" class="img-thumbnail npsod-img-list pointer" ng-repeat="format in outputFormats" ng-click="exportReport(format)">
+		</div>
+		<!-- Exporting Stage -->
+		<div ng-if="stage=='export'">
+			<div class="progress">
+				<div id="npsod-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+					<span class="sr-only">0% Complete</span>
+				</div>
+			</div>
+			<div ng-if="downloadable">
+				<p class="bg-success">
+					<span ng-href>Report has been exported successfully. Please press 'Download' to get result.</span>
+				</p>
+			</div>
+		</div>
+	</div>
+	</main>
+	<footer class="dm-footer">
+		<span ng-if="stage=='overview'" class="bootstrap_inside">
+			<button type="button" class="btn btn-primary" ng-click="go2SelectReportStage()">New Report</button>
+		</span>
+		<span ng-if="stage!='overview'">
+			<button lui-class="lui-button" x-variant="inverse" class="cancel-button lui-button lui-button--inverse" ng-click="go2OverviewStage()">Back to Tasks</button>
+		</span>
+		<button lui-class="lui-button" x-variant="inverse" class="cancel-button lui-button lui-button--inverse">Close</button>
+		<iframe id="download" style="display:none;"></iframe>
+	</footer>
+</div>
+</div>
