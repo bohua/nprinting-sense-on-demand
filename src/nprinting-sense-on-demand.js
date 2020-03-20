@@ -25,14 +25,16 @@ define([
         //ListboxApi,
         //Listbox
     ) {
-        // $(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight npsod-bar-btn'><span data-icon='toolbar-print'>NPrinting Reports</span></button>"));
+        $(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight npsod-bar-btn'><span data-icon='toolbar-print'>NPrinting Reports</span></button>"));
 
-        var app = qlik.currApp();
-        var currentSelections;
+        "use strict";
+
+        let app = qlik.currApp();
+        let currentSelections;
 
 
         function getLoginNtlm(conn) {
-            var URL = conn.server + 'api/v1/login/ntlm'
+            let URL = conn.server + 'api/v1/login/ntlm'
             return $.ajax({
                 url: URL,
                 method: 'GET',
@@ -42,61 +44,8 @@ define([
             });
         }
 
-        var Progress = function (element) {
-            var progress = 0;
-            var bar = element;
-
-            this.getProgress = function () {
-                return progress;
-            };
-
-            this.setProgress = function (value) {
-                progress = value;
-
-                bar.css("width", progress + "%");
-                bar.find("span").text(progress + '% Complete');
-            };
-
-            this.addProgress = function (increment) {
-                if (progress + increment < 100) {
-                    this.setProgress(progress + increment);
-                }
-            };
-        }
-
-        function checkProgress(URL, /*progress,*/ callback) {
-            $.ajax({
-                url: URL,
-                method: 'GET',
-                xhrFields: {
-                    withCredentials: true
-                }
-            }).then(function (response) {
-                switch (response.data.status) {
-                    case 'aborted':
-                    case 'failed':
-                        alert('Error');
-                        break;
-
-                    case 'queued':
-                    case 'running':
-                        //progress.addProgress(10);
-                        setTimeout(function () {
-                            checkProgress(URL, progress, callback);
-                        }, 1000);
-
-                        break;
-
-                    default:
-                        //progress.setProgress(100);
-                        callback();
-                }
-            });
-
-        }
-
         function getSelectionByApi() {
-            var fp = [];
+            let fp = [];
             if (currentSelections === undefined) {
                 return Promise.resolve([]);
             }
@@ -108,10 +57,10 @@ define([
         }
 
         function getSelectedValues(selection) {
-            var df = Deferred(),
+            let df = Deferred(),
                 f = app.field(selection.fieldName).getData(),
                 listener = function () {
-                    var isNumeric = false,
+                    let isNumeric = false,
                         selectedValues = f.rows.reduce(function (result, row) {
                             if (row.qState === 'S' || row.qState === 'L') {
                                 if (!isNumeric && !isNaN(row.qNum)) {
@@ -137,67 +86,8 @@ define([
             return df.promise;
         }
 
-        function getSelectionByQlik() {
-            globalSelectionService = qvangular.getService('qvGlobalSelectionsService');
-
-            return CurrentSelectionsModel.get().then(function (model) {
-                return model.getLayout().then(function (layout) {
-                    return getSelectedValuesByInternalService(layout, app.model.enigmaModel);
-                });
-            });
-        }
-
-        function getSelectedValuesByQlik(layout, enigmaModel) {
-            var i, qSelections = layout.qSelectionObject ? layout.qSelectionObject.qSelections : null;
-            var fieldPromises = [];
-
-            if (qSelections && qSelections.length > 0) {
-
-                var fieldExtractor = function (qFieldSelections, rects) {
-
-                    var rects = [{
-                        qTop: 0,
-                        qLeft: 0,
-                        qWidth: 1,
-                        qHeight: qFieldSelections.selectedCount
-                    }];
-
-                    var fp = Listbox.createTransientField(enigmaModel, qFieldSelections.fieldName, {}).then(function (model) {
-                        var backendApi = new ListboxApi(model);
-                        return backendApi.getData(rects).then(function (dataPages) {
-                            if (dataPages && dataPages.length) {
-                                var valArr = dataPages[0].qMatrix;
-                                var v;
-                                for (var j = 0; j < valArr.length; j++) {
-                                    v = valArr[j][0];
-                                    var isNum = !isNaN(v.qNum);
-                                    qFieldSelections.selectedValues.push(isNum ? v.qNum : v.qText);
-                                    // set isNumeric if there is a number
-                                    qFieldSelections.isNumeric = qFieldSelections.isNumeric || isNum;
-                                }
-                            }
-                            return qFieldSelections;
-                        });
-                    });
-                    return fp;
-                };
-
-                for (i = 0; i < qSelections.length; i++) {
-                    var fieldSelections = {
-                        fieldName: qSelections[i].qField,
-                        selectedCount: qSelections[i].qSelectedCount,
-                        selectedValues: [],
-                        isNumeric: false
-                    }
-                    fieldPromises.push(fieldExtractor(fieldSelections));
-                }
-            }
-
-            return Deferred.all(fieldPromises);
-        }
-
         function doExport(options) {
-            var conn = options.conn,
+            let conn = options.conn,
                 report = options.report,
                 format = options.format,
 
@@ -205,12 +95,12 @@ define([
 
             return selections.then(function (allFieldSelections) {
                 return getConnections(conn).then(function (response) {
-                    var connectionId;
+                    let connectionId;
                     if (response.data.totalItems == 1) {
                         connectionId = response.data.items[0].id;
                     } else {
-                        for (var i = 0; i < response.data.items.length; i++) {
-                            var appId = response.data.items[i].appId;
+                        for (let i = 0; i < response.data.items.length; i++) {
+                            let appId = response.data.items[i].appId;
 
                             if (appId == conn.app) {
                                 connectionId = response.data.items[i].id;
@@ -220,8 +110,8 @@ define([
                     }
 
 
-                    var requestUrl = conn.server + 'api/v1/ondemand/requests';
-                    var onDemandRequest = {
+                    let requestUrl = conn.server + 'api/v1/ondemand/requests';
+                    let onDemandRequest = {
                         type: 'report',
                         config: {
                             reportId: report,
@@ -247,7 +137,7 @@ define([
         }
 
         function getReportList(conn) {
-            var requestUrl = conn.server + 'api/v1/reports' + '?appId=' + conn.app + '&sort=+title';
+            let requestUrl = conn.server + 'api/v1/reports' + '?appId=' + conn.app + '&sort=+title';
 
             return $.ajax({
                 url: requestUrl,
@@ -259,7 +149,7 @@ define([
         }
 
         function getExportFormats(conn, report) {
-            var requestUrl = conn.server + 'api/v1/reports' + '/' + report.id;
+            let requestUrl = conn.server + 'api/v1/reports' + '/' + report.id;
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
@@ -270,7 +160,7 @@ define([
         }
 
         function getTasks(conn) {
-            var requestUrl = conn.server + 'api/v1/ondemand/requests' + '?appId=' + conn.app + '&sort=-created';
+            let requestUrl = conn.server + 'api/v1/ondemand/requests' + '?appId=' + conn.app + '&sort=-created';
 
             return $.ajax({
                 url: requestUrl,
@@ -282,7 +172,7 @@ define([
         }
 
         function getConnections(conn) {
-            var requestUrl = conn.server + 'api/v1/connections?appId=' + conn.app;
+            let requestUrl = conn.server + 'api/v1/connections?appId=' + conn.app;
 
             return $.ajax({
                 url: requestUrl,
@@ -294,7 +184,7 @@ define([
         }
 
         function deleteTask(conn, taskId) {
-            var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId;
+            let requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId;
 
             $.support.cors = true;
 
@@ -311,7 +201,7 @@ define([
         }
 
         function downloadTask(conn, taskId) {
-            var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId + '/result';
+            let requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId + '/result';
 
             document.getElementById('download').src = requestUrl;
         }
@@ -374,6 +264,23 @@ define([
             }
         }
 
+        //If preload is set to true, then start a silent export.
+        function checkPreload($scope) {
+            let report = $scope.layout.npsod.conn.report;
+
+            if ($scope.layout.npsod.conn.doPreload && report) {
+                let preloaded = $("body").data("preloaded") || [];
+                if (preloaded.indexOf(report) > -1) {
+                    console.log(`Report: [${report}] already preloaded`)
+                } else {
+                    console.log(`Report: [${report}] start to preload`)
+                    $scope.doExport(true);
+                    preloaded.push(report);
+                    $("body").data("preloaded", preloaded);
+                }
+            }
+        }
+
         return {
             support: {
                 snapshot: false,
@@ -389,14 +296,7 @@ define([
                     connectionSection: connectionSection,
                     ReportSection: ReportSection,
                     Appearance: AppearanceSection,
-                    addons: {
-                        uses: "addons",
-                        items: {
-                            dataHandling: {
-                                uses: "dataHandling"
-                            }
-                        }
-                    }
+                    addons: AddonSection
                 }
             },
 
@@ -408,35 +308,25 @@ define([
                 $scope.npodStatus = "idle";
                 $scope.currentTaskId = null;
 
-                var conn = $scope.layout.npsod.conn;
-                var currReport = null;
-                var buttonPosition = ($scope.layout.npsod.button && $scope.layout.npsod.button.position) ? $scope.layout.npsod.button.position : 'top';
+                let conn = $scope.layout.npsod.conn;
+                let buttonPosition = ($scope.layout.npsod.button && $scope.layout.npsod.button.position) ? $scope.layout.npsod.button.position : 'top';
                 $scope.buttonStyle = {
                     'vertical-align': buttonPosition
                 };
 
-                $scope.objId = Math.floor(Math.random() * 1000000);
-                var x = document.createElement("var");
-                x.id = $scope.objId;
-                document.body.appendChild(x);
-
-                var vars = document.getElementsByTagName('var');
-                if (vars[0].id == $scope.objId) {
-                    getLoginNtlm(conn);
-                }
-
-                $('.npsod-bar-btn').on('click', function () {
-                    $scope.popupDg();
-                });
-
-
-                $scope.doExport = function () {
-                    var mode = $scope.layout.npsod.button.mode;
-                    var options = {
+                $scope.doExport = function (isPreload) {
+                    let mode = $scope.layout.npsod.button.mode;
+                    let options = {
                         conn: conn,
                         report: conn.report,
                         format: conn.exportFormat
                     };
+
+                    //Do preload and leave it running silently
+                    if (isPreload) {
+                        doExport(options);
+                        return;
+                    }
 
                     if (!mode || mode === "popup") {
                         doExport(options).then(function (response) {
@@ -444,11 +334,11 @@ define([
                         });
                     } else if (mode === "single") {
                         doExport(options).then(function (reply) {
-                            var taskId = reply.data.id;
-                            var pullTaskHandler = function () {
+                            let taskId = reply.data.id;
+                            let pullTaskHandler = function () {
                                 getTasks(conn).then(function (reply) {
-                                    var currentTask;
-                                    var task = reply.data.items.forEach(function (i) {
+                                    let currentTask;
+                                    let task = reply.data.items.forEach(function (i) {
                                         if (i.id !== taskId) {
                                             deleteTask(conn, i.id);
                                         } else {
@@ -479,10 +369,10 @@ define([
                 $scope.popupDg = function () {
                     //exportReport(format, currReport);
                     if ($('.npsod-popup').length == 0) {
-                        var viewPopupDg = $compile(viewPopup);
+                        let viewPopupDg = $compile(viewPopup);
                         $("body").append(viewPopupDg($scope));
 
-                        var modal = $(".npsod-popup");
+                        let modal = $(".npsod-popup");
                         modal.find("button.cancel-button").on('qv-activate', function () {
                             modal.remove();
                             if (angular.isDefined(pullTaskHandler)) {
@@ -491,7 +381,7 @@ define([
                             }
                         });
 
-                        var pullTaskHandler = $interval(function () {
+                        let pullTaskHandler = $interval(function () {
                             getTasks(conn).then(function (response) {
                                 $scope.taskList = response.data.items;
                                 $scope.$apply();
@@ -529,7 +419,7 @@ define([
                 };
 
                 $scope.exportReport = function (format) {
-                    var options = {
+                    let options = {
                         conn: conn,
                         report: $scope.currReport.id,
                         format: format
@@ -564,18 +454,35 @@ define([
 
                 //Selection Listener
                 // create an object
-                var selState = app.selectionState();
-                var listener = function () {
+                let selState = app.selectionState();
+                let listener = function () {
                     currentSelections = selState.selections;
                 };
                 //bind the listener
                 selState.OnData.bind(listener);
 
 
+                //Authenticate NPSOD
+                let auth = $("body").data("npsodAuth");
+                if (!auth) {
+                    getLoginNtlm(conn).then(function () {
+                        $("body").data("npsodAuth", true);
+
+                        checkPreload($scope);
+                    });
+                } else {
+                    checkPreload($scope);
+                }
+
+                $('.npsod-bar-btn').on('click', function () {
+                    $scope.popupDg();
+                });
+
+
                 // Hacking the layout
 
-                var innerObj = $($element).parents(".qv-inner-object");
-                var outterObj = $($element).parents(".qv-object");
+                let innerObj = $($element).parents(".qv-inner-object");
+                let outterObj = $($element).parents(".qv-object");
 
                 innerObj.css('background', 'transparent');
                 outterObj.css('border', 'none');
@@ -583,7 +490,7 @@ define([
             }],
             paint: function ($element, layout) {
                 let $scope = this.$scope;
-                var buttonPosition = (layout.npsod.button && layout.npsod.button.position) ? layout.npsod.button.position : 'top';
+                let buttonPosition = (layout.npsod.button && layout.npsod.button.position) ? layout.npsod.button.position : 'top';
                 $scope.buttonStyle = {
                     'vertical-align': buttonPosition
                 };
@@ -591,68 +498,6 @@ define([
                 $scope.CSSConditionalClass = (layout.npsod.button.CSSConditionalClass || layout.npsod.button.CSSConditionalClass.length > 0) ? layout.npsod.button.CSSConditionalClass : '';
 
 
-            },
-            /*
-            paint: function($element) {
-                var nprintingBase = 'https://nprinting.s-cubed.local:4993/api/v1';
-                var onDemandRequest = {
-                    type: "report",
-                    config: {
-                        reportId: "b6feb065-0fec-43b5-a238-43342fbc88e0",
-                        outputFormat: "xls"
-                    }
-                };
-
-                var button = createBtn("export", "Export");
-
-                $element.html(button);
-
-                var btnInstnace = $element.find("button")[0];
-
-                $(btnInstnace).on('click', function($event) {
-                    //alert("OK");
-                    $.ajax({
-                        url: nprintingBase + '/login/ntlm',
-                        xhrFields: {
-                            withCredentials: true
-                        }
-                    }).done(function(credential) {
-                        $.ajax({
-                            url: nprintingBase + '/ondemand/requests',
-                            method: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify(onDemandRequest),
-                            xhrFields: {
-                                withCredentials: true
-                            }
-                        }).done(function(response) {
-                            showLoading();
-
-                            $element.append($('<iframe id="download" style="display:none;"></iframe>'));
-
-                            setTimeout(function() {
-                                document.getElementById('download').src = nprintingBase + '/ondemand/requests/' + response.data.id + '/result';
-
-                                //window.location.assign()
-
-                                $.ajax({
-                                    url: nprintingBase + '/ondemand/requests/' + response.data.id + '/result',
-                                    crossDomain: true,
-                                    xhrFields: {
-                                        withCredentials: true
-                                    }
-                                });
-
-                            }, 5000);
-
-                        });
-                    });
-
-                });
-                //needed for export
-                return qlik.Promise.resolve();
             }
-            */
         };
-
     });

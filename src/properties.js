@@ -131,6 +131,7 @@ var AppearanceSection = {
 	items: {
 		button: {
 			label: "Button",
+			type: "items",
 			items: {
 				label: {
 					ref: "npsod.conn.label",
@@ -181,6 +182,7 @@ var AppearanceSection = {
 		},
 		presentation: {
 			label: "Display",
+			type: "items",
 			items: {
 				buttonPosition: {
 					type: "string",
@@ -223,3 +225,32 @@ var AppearanceSection = {
 		},
 	}
 };
+
+var AddonSection = {
+	uses: "addons",
+	items: {
+		dataHandling: {
+			uses: "dataHandling"
+		},
+		preload: {
+			label: "Preload",
+			type: "items",
+			items: {
+				doPreload: {
+					type: "boolean",
+					component: "switch",
+					label: "Preload when app startups",
+					ref: "npsod.conn.doPreload",
+					options: [{
+						value: true,
+						label: "Yes"
+					}, {
+						value: false,
+						label: "No"
+					}],
+					defaultValue: false
+				}
+			}
+		}
+	}
+}
