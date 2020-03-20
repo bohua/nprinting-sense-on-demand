@@ -3,6 +3,7 @@ define([
         "qlik",
         "text!./template/view-main-single.html",
         "text!./template/view-popup.html",
+        "text!./template/np-btn.html",
         //"client.models/current-selections",
         "qvangular",
         "core.utils/deferred",
@@ -19,14 +20,13 @@ define([
         qlik,
         viewMain,
         viewPopup,
+        npBtn,
         //CurrentSelectionsModel,
         qvangular,
         Deferred
         //ListboxApi,
         //Listbox
     ) {
-        $(".qui-buttonset-right").prepend($("<button class='lui-button lui-button--toolbar iconToTheRight npsod-bar-btn'><span data-icon='toolbar-print'>NPrinting Reports</span></button>"));
-
         "use strict";
 
         let app = qlik.currApp();
@@ -302,6 +302,20 @@ define([
 
             template: viewMain,
 
+            updateData: function () {
+                let $scope = this.$scope;
+                if ($(".npsod-top-bar").length < 1 && $scope.layout.npsod.conn.selfService) {
+                    $(".qs-toolbar__right").prepend($(npBtn)).find('.npsod-bar-btn').on('click', function () {
+                        $scope.popupDg();
+                    });
+                } else {
+                    $('.npsod-bar-btn').off();
+                    $(".npsod-top-bar").remove();
+                }
+
+                return qlik.Promise.resolve();
+            },
+
             controller: ['$scope', '$element', '$compile', '$interval', '$timeout', function ($scope, $element, $compile, $interval, $timeout) {
                 //$scope.label = "Export";
                 $scope.downloadable = false;
@@ -474,19 +488,13 @@ define([
                     checkPreload($scope);
                 }
 
-                $('.npsod-bar-btn').on('click', function () {
-                    $scope.popupDg();
-                });
-
-
                 // Hacking the layout
 
                 let innerObj = $($element).parents(".qv-inner-object");
-                let outterObj = $($element).parents(".qv-object");
+                let outterObj = $($element).parents(".qv-gridcell");
 
                 innerObj.css('background', 'transparent');
-                outterObj.css('border', 'none');
-                outterObj.find('.lui-icon--expand ').remove();
+                outterObj.find('.lui-icon--expand ').hide();
             }],
             paint: function ($element, layout) {
                 let $scope = this.$scope;
@@ -496,8 +504,9 @@ define([
                 };
                 $scope.DomId = layout.npsod.button.DomId;
                 $scope.CSSConditionalClass = (layout.npsod.button.CSSConditionalClass || layout.npsod.button.CSSConditionalClass.length > 0) ? layout.npsod.button.CSSConditionalClass : '';
-
-
+            },
+            beforeDestroy: function () {
+                $(".npsod-top-bar").off().remove();
             }
         };
     });

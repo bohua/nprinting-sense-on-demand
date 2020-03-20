@@ -251,6 +251,26 @@ var AddonSection = {
 					defaultValue: false
 				}
 			}
+		},
+		selfService: {
+			label: "Self Service",
+			type: "items",
+			items: {
+				selfService: {
+					type: "boolean",
+					component: "switch",
+					label: "Show Self Service button in top bar",
+					ref: "npsod.conn.selfService",
+					options: [{
+						value: true,
+						label: "Yes"
+					}, {
+						value: false,
+						label: "No"
+					}],
+					defaultValue: false
+				}
+			}
 		}
 	}
 }
