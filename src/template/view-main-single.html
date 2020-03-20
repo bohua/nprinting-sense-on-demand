@@ -9,7 +9,7 @@
 		<div class="btn-group npsod-single-export-btn" ng-if="layout.npsod.button.mode=='single'"
 			ng-class="CSSConditionalClass" ng-attr-id="{{ DomId }}">
 			<button type="button" class="btn main-btn main-btn"
-				ng-class="{'btn-primary':npodStatus=='idle', 'btn-warning': npodStatus=='working', 'btn-danger': npodStatus=='deleting'}"
+				ng-class="{'btn-primary':npodStatus=='idle', 'full-width':npodStatus!='working', 'btn-warning': npodStatus=='working', 'btn-danger': npodStatus=='deleting'}"
 				ng-click="doExport()">
 
 				<span ng-if="npodStatus == 'idle'">{{layout.npsod.conn.label}}</span>
@@ -30,8 +30,9 @@
 					</g>
 				</svg>
 			</button>
-			<button type="button" class="btn dropdown-toggle btn-danger" ng-show="npodStatus=='working'">
-				<span class="glyphicon glyphicon-trash"></span>
+			<button type="button" class="btn dropdown-toggle btn-warning" ng-show="npodStatus=='working'"
+				ng-click="deleteTask(currentTaskId)">
+				<span class=" glyphicon glyphicon-trash"></span>
 				<span class="sr-only">Cancel Export</span>
 			</button>
 			<!-- <ul class="dropdown-menu">

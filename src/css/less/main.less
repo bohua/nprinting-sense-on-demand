@@ -73,7 +73,13 @@ img.npsod-img-list:hover {
 .npsod-single-export-btn {
     .main-btn {
         height: 34px;
-        width: calc(100% - 25px);
+        width: calc(100% - 30px);
+
+        &.full-width {
+            width: 100%;
+            border-bottom-right-radius: 4px !important;
+            border-top-right-radius: 4px !important;
+        }
 
         &.btn-warning {
             .npsod-export-btn-icon {
