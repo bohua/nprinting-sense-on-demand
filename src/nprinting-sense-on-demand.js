@@ -406,6 +406,8 @@ define([
                 //$scope.label = "Export";
                 $scope.downloadable = false;
                 $scope.npodStatus = "idle";
+                $scope.currentTaskId = null;
+
                 var conn = $scope.layout.npsod.conn;
                 var currReport = null;
                 var buttonPosition = ($scope.layout.npsod.button && $scope.layout.npsod.button.position) ? $scope.layout.npsod.button.position : 'top';
@@ -428,7 +430,8 @@ define([
                 });
 
 
-                $scope.doExport = function (mode) {
+                $scope.doExport = function () {
+                    var mode = $scope.layout.npsod.button.mode;
                     var options = {
                         conn: conn,
                         report: conn.report,
@@ -441,12 +444,7 @@ define([
                         });
                     } else if (mode === "single") {
                         doExport(options).then(function (reply) {
-                            $scope.npodStatus = "working";
-
-                            console.log(reply)
-
                             var taskId = reply.data.id;
-
                             var pullTaskHandler = function () {
                                 getTasks(conn).then(function (reply) {
                                     var currentTask;
@@ -461,6 +459,7 @@ define([
                                     switch (currentTask.status) {
                                         case "completed":
                                             $scope.npodStatus = "idle";
+                                            $scope.currentTaskId = null;
                                             downloadTask(conn, taskId);
                                             break;
 
@@ -470,6 +469,8 @@ define([
                                 });
                             };
 
+                            $scope.npodStatus = "working";
+                            $scope.currentTaskId = taskId;
                             pullTaskHandler();
                         });
                     }
@@ -540,9 +541,21 @@ define([
                 };
 
                 $scope.deleteTask = function (taskId) {
-                    deleteTask(conn, taskId).then(function () {
-                        $scope.go2OverviewStage(conn);
-                    });
+                    $scope.npodStatus = "deleting";
+
+                    if (taskId) {
+                        let mode = $scope.layout.npsod.button.mode;
+
+                        deleteTask(conn, taskId).then(function () {
+
+                            if (mode === "single") {
+                                $scope.npodStatus = "idle";
+                                $scope.currentTaskId = null;
+                            } else {
+                                $scope.go2OverviewStage(conn);
+                            }
+                        });
+                    }
                 };
 
                 $scope.downloadTask = function (taskId) {

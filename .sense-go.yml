@@ -159,7 +159,7 @@ taskChains:
   - "shell"
   - "clean:tmp"
   - "copy:toTmp"
-  - "import:fromLocal"
+  # - "import:fromLocal"
   - "less:reduce"
   - "replace:tmp"
   - "wbfolder:tmp"

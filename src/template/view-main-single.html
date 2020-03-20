@@ -1,13 +1,22 @@
 <div qv-extension class="bootstrap_inside npsod-canvas">
 	<div class="npsod-btn-container" ng-style="buttonStyle">
+		<!-- Popup Mode -->
 		<button ng-if="layout.npsod.button.mode=='popup' || !layout.npsod.button.mode" type="button"
 			class="btn btn-primary npsod-export-btn" ng-class="CSSConditionalClass" ng-attr-id="{{ DomId }}"
-			ng-click="doExport(layout.npsod.button.mode)">{{layout.npsod.conn.label}}</button>
+			ng-click="doExport()">{{layout.npsod.conn.label}}</button>
 
+		<!-- Single Button Mode -->
 		<div class="btn-group npsod-single-export-btn" ng-if="layout.npsod.button.mode=='single'"
 			ng-class="CSSConditionalClass" ng-attr-id="{{ DomId }}">
-			<button type="button" class="btn btn-default main-btn main-btn"
-				ng-click="doExport(layout.npsod.button.mode)">{{layout.npsod.conn.label}}
+			<button type="button" class="btn main-btn main-btn"
+				ng-class="{'btn-primary':npodStatus=='idle', 'btn-warning': npodStatus=='working', 'btn-danger': npodStatus=='deleting'}"
+				ng-click="doExport()">
+
+				<span ng-if="npodStatus == 'idle'">{{layout.npsod.conn.label}}</span>
+				<span ng-if="npodStatus == 'working'">{{layout.npsod.conn.workingLabel || "Exporting Report..."}}</span>
+				<span
+					ng-if="npodStatus == 'deleting'">{{layout.npsod.conn.deletingLabel || "Canceling Report..."}}</span>
+
 				<svg class="npsod-export-btn-icon" ng-src="{{getImg('LOADING')}}" width="15" height="15"
 					viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#fff">
 					<g fill="none" fill-rule="evenodd">
@@ -21,18 +30,18 @@
 					</g>
 				</svg>
 			</button>
-			<button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" aria-haspopup="true"
-				aria-expanded="false">
-				<span class="caret"></span>
-				<span class="sr-only">Toggle Dropdown</span>
+			<button type="button" class="btn dropdown-toggle btn-danger" ng-show="npodStatus=='working'">
+				<span class="glyphicon glyphicon-trash"></span>
+				<span class="sr-only">Cancel Export</span>
 			</button>
-			<ul class="dropdown-menu">
-				<li><a href="#">Action</a></li>
-				<li><a href="#">Another action</a></li>
-				<li><a href="#">Something else here</a></li>
-				<li role="separator" class="divider"></li>
-				<li><a href="#">Separated link</a></li>
-			</ul>
+			<!-- <ul class="dropdown-menu">
+				<li ng-click="deleteTask(currentTaskId)">
+					<a class="dropdown-item">
+						<span class="text-danger glyphicon glyphicon-trash"></span>
+						<span class="text-danger"> Cancel Export</span>
+					</a>
+				</li>
+			</ul> -->
 		</div>
 	</div>
 	<iframe id="download" style="display:none;"></iframe>

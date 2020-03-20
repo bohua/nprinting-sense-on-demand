@@ -136,7 +136,8 @@ var AppearanceSection = {
 					ref: "npsod.conn.label",
 					label: "Button Label",
 					type: "string",
-					expression: "optional"
+					expression: "optional",
+					defaultValue: "Export"
 				},
 				mode: {
 					ref: "npsod.button.mode",
@@ -155,6 +156,26 @@ var AppearanceSection = {
 						}
 					],
 					defaultValue: "popup"
+				},
+				workingLabel: {
+					ref: "npsod.conn.workingLabel",
+					label: "Exporting Label",
+					type: "string",
+					expression: "optional",
+					defaultValue: "Exporting Report...",
+					show: function (data) {
+						return data.npsod.button.mode === "single";
+					}
+				},
+				deletingLabel: {
+					ref: "npsod.conn.deletingLabel",
+					label: "Canceling Label",
+					type: "string",
+					expression: "optional",
+					defaultValue: "Canceling Report...",
+					show: function (data) {
+						return data.npsod.button.mode === "single";
+					}
 				},
 			}
 		},
