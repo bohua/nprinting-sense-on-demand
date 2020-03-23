@@ -25,8 +25,6 @@ define([
     ) {
         "use strict";
 
-        console.log(FileSaver);
-
         let app = qlik.currApp();
         let currentSelections;
 
