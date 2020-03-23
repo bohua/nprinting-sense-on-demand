@@ -252,6 +252,26 @@ var AddonSection = {
 				}
 			}
 		},
+		download: {
+			label: "Download",
+			type: "items",
+			items: {
+				autoUnzip: {
+					type: "boolean",
+					component: "switch",
+					label: "Auto unzip and download Html file only",
+					ref: "npsod.conn.autoUnzip",
+					options: [{
+						value: true,
+						label: "Yes"
+					}, {
+						value: false,
+						label: "No"
+					}],
+					defaultValue: false
+				}
+			}
+		},
 		selfService: {
 			label: "Self Service",
 			type: "items",

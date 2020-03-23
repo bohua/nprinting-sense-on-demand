@@ -1,14 +1,12 @@
 define([
         "jquery",
         "qlik",
+        "./js/jszip.min",
+        "./js/jszip-util.min",
         "text!./template/view-main-single.html",
         "text!./template/view-popup.html",
         "text!./template/np-btn.html",
-        //"client.models/current-selections",
-        "qvangular",
         "core.utils/deferred",
-        //"objects.backend-api/listbox-api",
-        //"objects.models/listbox",
         "./js/button",
         "./js/dropdown",
         "./properties",
@@ -18,16 +16,16 @@ define([
     function (
         $,
         qlik,
+        JSZip,
+        JSZipUtils,
         viewMain,
         viewPopup,
         npBtn,
-        //CurrentSelectionsModel,
-        qvangular,
         Deferred
-        //ListboxApi,
-        //Listbox
     ) {
         "use strict";
+
+        console.log(FileSaver);
 
         let app = qlik.currApp();
         let currentSelections;
@@ -200,10 +198,52 @@ define([
             });
         }
 
-        function downloadTask(conn, taskId) {
+        var saveBlob = (function () {
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            return function (blob, fileName) {
+                var url = window.URL.createObjectURL(blob);
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            };
+        }());
+
+        function downloadTask(conn, taskId, currentTask) {
             let requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId + '/result';
 
-            document.getElementById('download').src = requestUrl;
+            if (currentTask && currentTask.outputFormat === "HTML" & conn.autoUnzip) {
+                var promise = new qlik.Promise(function (resolve, reject) {
+                    JSZipUtils.getBinaryContent(requestUrl, function (err, data) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(data);
+                        }
+                    });
+                });
+
+                promise.then(JSZip.loadAsync)
+                    .then(function (zip) {
+                        let hits = Object.keys(zip.files).filter(function (filename) {
+                            return filename.endsWith(".Html");
+                        });
+
+                        if (hits.length > 0) {
+                            let htmlFile = zip.file(hits[0]);
+
+                            htmlFile.async("blob").then(function (blob) {
+                                saveBlob(blob, currentTask.title + ".html");
+                            });
+                        } else {
+                            alert("No HTML found in zip");
+                        }
+                    });
+            } else {
+                document.getElementById('download').src = requestUrl;
+            }
         }
 
         function getImg(type) {
@@ -364,7 +404,7 @@ define([
                                         case "completed":
                                             $scope.npodStatus = "idle";
                                             $scope.currentTaskId = null;
-                                            downloadTask(conn, taskId);
+                                            downloadTask(conn, currentTask.id, currentTask);
                                             break;
 
                                         default:
