@@ -14,7 +14,8 @@ define([
     "text!./template/view-main-single.html",
     "text!./template/view-popup.html",
     "qvangular",
-    "core.utils/deferred"
+    "core.utils/deferred",
+    "core.utils/feature-flags"
 ],
 function(
     $,
@@ -25,7 +26,8 @@ function(
     viewMain,
     viewPopup,
     qvangular,
-    Deferred
+    Deferred,
+    FeatureFlags
 ) {
     $("<style>").html(css).appendTo("head");
 
@@ -324,6 +326,9 @@ function(
                             } else if (err.status === 403) {
                                 $scope.disableNewReport = true;
                                 $scope.errorMessage = 'Server access blocked by server.';
+                            } else if (err.status === 999) {
+                                $scope.disableNewReport = true;
+                                $scope.errorMessage = 'On-Demand reporting control is not supported in this environment.';
                             } else {
                                 $scope.errorMessage = 'Unknown error.';
                             }
@@ -423,23 +428,28 @@ function(
                             $scope.close();
                         };
 
-                         // Authenticate the user when opening
-                         hlp.getLoginNtlm(conn.server).then(function () {
-                            // Make sure the Sense app is correct for this setup
-                            onLoading('Connecting...');
-                            hlp.getConnections(conn.server, conn.app, null, null, null, app, model).then(function (connections) {
-                                if (connections.length === 0) {
-                                    onError({status: 1});
-                                    return;
-                                }
-                                $scope.go2OverviewStage(true);
-                                
+                        // show custom error message for QCS/QSEoK - not supported environment
+                        if (!FeatureFlags.HAS_QRS && !FeatureFlags.ISDESKTOPCLIENT) {
+                            onError({status: 999});
+                        } else {
+                            // Authenticate the user when opening
+                            hlp.getLoginNtlm(conn.server).then(function () {
+                                // Make sure the Sense app is correct for this setup
+                                onLoading('Connecting...');
+                                hlp.getConnections(conn.server, conn.app, null, null, null, app, model).then(function (connections) {
+                                    if (connections.length === 0) {
+                                        onError({status: 1});
+                                        return;
+                                    }
+                                    $scope.go2OverviewStage(true);
+                                    
+                                }).catch(function (err) {
+                                    onError(err);
+                                });
                             }).catch(function (err) {
                                 onError(err);
                             });
-                        }).catch(function (err) {
-                            onError(err);
-                        });    
+                        } 
                     }],
                     input: {
                         stage: $scope.stage
