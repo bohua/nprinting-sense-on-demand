@@ -10,7 +10,32 @@ defaults: &defaults
     PACKAGE_NAME: "qlik-on-demand-reporting"
 
 jobs:
-  test:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/qlik-on-demand-reporting
+      - run:
+          name: Install dependencies
+          command: npm install
+      - run:
+          name: Build and package
+          command: |
+            sudo chmod +x scripts/get-version.sh
+            export VERSION=$(scripts/get-version.sh)
+            echo "Version: $VERSION"
+            npm run build:zip
+          environment:
+            NODE_ENV: production
+      - persist_to_workspace:
+          root: ~/qlik-on-demand-reporting
+          paths:
+            - dist
+      - store_artifacts:
+          path: dist
+          destination: dist
+  blackduck:
     docker:
     - image: circleci/node:stretch-browsers
     steps:
@@ -26,50 +51,6 @@ jobs:
             --blackduck.username="svc-blackduck" \
             --blackduck.password=${svc_blackduck} \
             --detect.project.name="nprinting-sense-on-demand"
-
-  bump-version:
-    <<: *defaults
-    steps:
-      - checkout
-      - run:
-          name: Bump version
-          command: |
-            sudo chmod +x scripts/bump-version.sh
-            sudo chmod +x scripts/get-latest-version.sh
-            scripts/bump-version.sh $GITHUB_ORG $GITHUB_REPO
-      - persist_to_workspace:
-          root: ~/qlik-on-demand-reporting
-          paths:
-            - BUMPED_VERSION
-
-  build:
-    <<: *defaults
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/qlik-on-demand-reporting
-      - run:
-          name: Install dependencies
-          command: npm install
-      - run:
-          name: Build and package
-          command: |
-            sudo chmod +x scripts/get-bumped-version.sh
-            export VERSION=$(scripts/get-bumped-version.sh)
-            echo "Version: $VERSION"
-            npm run build:zip
-            sudo chmod +x scripts/verify-files.sh
-            scripts/verify-files.sh
-          environment:
-            NODE_ENV: production
-      - persist_to_workspace:
-          root: ~/qlik-on-demand-reporting
-          paths:
-            - dist
-      - store_artifacts:
-          path: dist
-          destination: dist
-
   deploy:
     <<: *defaults
     steps:
@@ -84,8 +65,8 @@ jobs:
       - run:
           name: Create GitHub Release
           command: |
-            sudo chmod +x scripts/get-bumped-version.sh
-            export VERSION=$(scripts/get-bumped-version.sh)
+            sudo chmod +x scripts/get-version.sh
+            export VERSION=$(scripts/get-version.sh)
             echo "Version: $VERSION"
             sudo chmod +x scripts/create-release.sh
             scripts/create-release.sh $GITHUB_ORG $GITHUB_REPO $PACKAGE_NAME $VERSION
@@ -94,17 +75,22 @@ workflows:
   version: 2
   master_flow:
     jobs:
-      - test
-      - bump-version:
-          requires:
-            - test
       - build:
-          requires:
-            - bump-version
+          filters: # Required since jobs that requires this uses tag-filter
+            tags:
+              only: /.*/
+      - blackduck:
+          filters: # Required since jobs that requires this uses tag-filter
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - build
+            - blackduck
           filters:
-            branches:
+            tags:
               only:
-                - qlik-on-demand-reporting
+                - /^v.*/
+            branches:
+              # Have to ignore branches to make the tags-filter work
+              ignore: /.*/
