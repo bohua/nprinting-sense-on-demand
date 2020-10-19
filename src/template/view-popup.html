@@ -1,0 +1,88 @@
+<div class="lui-modal-background"></div>
+<div class="lui-dialog qlik-on-demand-reporting">
+	<div class="lui-dialog__header">
+		<div class="lui-dialog__title">Export</div>
+	</div>
+	<div class="lui-dialog__body print-on-demand">
+		<!-- Error -->
+		<div ng-if="errorMessage" class="qodr-message-container">
+			<span class="message-label">{{errorMessage}}</span>
+		</div>
+		<!-- Loading Data -->
+		<div ng-if="stage=='loading'" class="qodr-message-container">
+			<div class="pp-loader qv-loader"></div>
+			<span class="message-label">{{loadingMessage}}</span>
+		</div>
+		<!-- Overview -->
+		<div ng-if="stage=='overview' && !errorMessage">
+			<ul class="lui-list print-overview">
+				<li class="lui-list__item" ng-repeat="task in taskList">
+					<span class="lui-list__text">
+						<span class="task-title" title={{task.title}}>{{task.title}} - </span>({{task.outputFormat}}) - 
+						<drm-format-date x-date="task.created" x-skeleton="yMMMdjm"></drm-format-date>
+					</span>
+					<span class="lui-list__aside">
+						<span ng-if="task.status=='failed'" class="task-title">Request failed</span>
+						<span ng-if="task.status=='completed'" ng-click="downloadTask(task.id)" class="lui-icon  lui-icon--download"></span>
+						<span ng-if=" task.status=='running' || task.status=='queued'">
+							<div class="pp-loader qv-loader"></div>
+						</span>
+						<span ng-if="task.status!='deleting'" ng-click="deleteTask(task)" style="padding-left: 10px" class="lui-icon  lui-icon--bin"></span>
+						<span ng-if=" task.status=='deleting'">
+							<div class="pp-loader qv-loader"></div>
+						</span>
+					</span>
+				</li>
+			</ul>
+		</div>
+		<!-- Select Report Stage -->
+		<div ng-if="stage=='selectReport'" class="list-group npsod-list-group">
+			<ul class="lui-list print-select-report">
+				<li class="lui-list__header">
+					<span class="lui-list__text">Select a report to choose desired format</span>
+				</li>
+				<li class="lui-list__item" ng-repeat="report in reportList" ng-click="go2selectFormatStage(report)">
+					<span class="lui-list__text">
+						<h4 class="list-group-item-heading bold" title={{report.title}}>{{report.title.length > 50 ? report.title.slice(0,47) + '...' : report.title}}</h4>
+						<p class="list-group-item-text">Description: {{report.description}}</p>
+						<p class="list-group-item-text">Type: {{report.type}}</p>
+						<p class="list-group-item-text">Created: <drm-format-date x-date="report.created" x-skeleton="yMMMdjm"></drm-format-date></p>
+					</span>
+					<span class="lui-list__aside">
+						<span>({{report.type}})</span>
+					</span>
+				</li>
+			</ul>
+		</div>
+		<!-- Select Format Stage -->
+		<div ng-if="stage=='selectFormat'">
+			<ul class="lui-list print-select-format">
+				<li class="lui-list__item" ng-repeat="format in outputFormats" ng-click="exportReport(format)">
+					<span class="lui-list__text">
+						{{format}}
+					</span>
+				</li>
+			</ul>
+		</div>
+		<!-- Exporting Stage -->
+		<div ng-if="stage=='export'">
+			<div class="progress">
+				<div id="npsod-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+					<span class="sr-only">0% Complete</span>
+				</div>
+			</div>
+			<div ng-if="downloadable">
+				<p class="bg-success">
+					<span ng-href>Report has been exported successfully. Please press 'Download' to get result.</span>
+				</p>
+			</div>
+		</div>
+	</div>
+	<div class="lui-dialog__footer">
+		<button class="cancel-button lui-button  lui-dialog__button" ng-click="cancel()">Close</button>
+		<button ng-if="stage=='overview' || disableNewReport" ng-disabled="disableNewReport" type="button" class="lui-button  lui-dialog__button" ng-click="exportReport()">Quick Report</button>
+		<button ng-if="stage=='overview' || disableNewReport" ng-disabled="disableNewReport" type="button" class="lui-button  lui-dialog__button" ng-click="go2SelectReportStage()">New Report</button>
+		<button ng-if="stage!='overview' && !disableNewReport" ng-disabled="stage=='loading'" class="cancel-button lui-button  lui-dialog__button" ng-click="go2OverviewStage(false)">Back to Tasks</button>
+		<div id="download" style="display:none;"></div>
+	</div>
+</div>

@@ -1,0 +1,120 @@
+.pointer {
+	cursor: pointer!important;
+}
+
+.bold {
+	font-weight: bold!important;
+}
+
+.scroll {
+	overflow: auto!important;
+}
+
+.npsod-img-header {
+	max-width: 64px;
+	max-height: 64px;
+}
+
+.npsod-img-list {
+	max-width: 128px;
+	max-height: 128px;
+	margin: 20px;
+}
+
+img.npsod-img-list:hover{
+	background-color:#e8e8e8;
+};
+
+.npsod-list-group > div:hover{
+	background-color: #e8e8e8;
+}
+
+.npsod-list-menu-icon {
+	top: -27px!important;
+    float: right;
+    font-size: 20px;
+    margin: 0 5px;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f8f8f8;
+}
+.npsod-list-menu-icon:hover{
+	background-color: #e8e8e8;
+}
+
+.npsod-list-loading-icon {
+	position: relative;
+    float: right;
+    top: -20px!important;
+    width: 20px;
+    height: 20px;
+    margin: 0 10px!important;
+}
+
+.npsod-export-btn {
+	width: 100%;
+}
+
+.print-on-demand .lui-list.print-overview .lui-list__item:hover {
+	background: transparent;
+}
+
+.print-on-demand .task-title {
+	font-weight: bold;
+}
+
+.print-on-demand .lui-icon--download {
+	margin-right: 8px;
+}
+
+.print-on-demand .print-select-report .lui-list__item {
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.print-on-demand .print-select-report .lui-list__item .lui-list__aside {
+	font-weight: bold;
+}
+
+.qlik-on-demand-reporting .qodr-message-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 47vh;
+}
+
+.qlik-on-demand-reporting .qodr-message-container .pp-loader {
+	height: 120px;
+	width: 120px;
+	opacity: 0.7;
+}
+
+.qlik-on-demand-reporting .qodr-message-container .message-label {
+	margin-top: 20px;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.lui-dialog.qlik-on-demand-reporting {
+	max-height: 90%; 
+	max-width: 90%; 
+	min-height: 60%; 
+	min-width: 600px;	
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+	/* IE10+ CSS styles go here */
+	/* rule for IE: works like min-w and min-h */
+	.lui-dialog.qlik-on-demand-reporting {
+		height: 60%; 
+		width: 600px;
+	}
+}
+
+@media screen and (max-width: 640px), screen and (max-height: 480px) {
+	.lui-dialog.qlik-on-demand-reporting {
+		min-width: 321px;
+	}
+}
