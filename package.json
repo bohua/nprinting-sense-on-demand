@@ -9,9 +9,11 @@
     "license": "MIT",
     "scripts": {
         "build": "gulp build",
-        "build:zip": "gulp zip"
+        "build:zip": "gulp zip",
+        "test:unit": "jest --config ./test/jest.config.js"
     },
     "devDependencies": {
+        "@babel/preset-env": "7.1.0",
         "del": "^2.0.2",
         "gulp": "4.0.0",
         "gulp-cssnano": "^2.1.0",
@@ -22,6 +24,7 @@
         "gulp-uglify": "^3.0.1",
         "gulp-util": "^3.0.7",
         "gulp-zip": "^3.0.2",
+        "jest": "^27.1.0",
         "uglify-save-license": "^0.4.1"
     }
 }
