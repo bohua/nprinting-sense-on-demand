@@ -7,5 +7,3 @@ module.exports = {
     setupFilesAfterEnv: ['<rootDir>/setup.js'],
     moduleNameMapper: { '\\.(css)$': '<rootDir>/empty-module.js' }
   };
-  
-  
