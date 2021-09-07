@@ -8,3 +8,4 @@ module.exports = {
     moduleNameMapper: { '\\.(css)$': '<rootDir>/empty-module.js' }
   };
   
+  
