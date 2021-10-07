@@ -20,6 +20,9 @@ jobs:
           name: Install dependencies
           command: npm install
       - run:
+          name: Unit tests
+          command: npm run test:unit
+      - run:
           name: Build and package
           command: |
             sudo chmod +x scripts/get-version.sh
