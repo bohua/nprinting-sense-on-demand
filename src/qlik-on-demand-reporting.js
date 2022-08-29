@@ -87,6 +87,9 @@ function(
                             isNumeric = true;
                             return item.qNum;
                         }
+                        if (typeof item.qText === "undefined") {
+                            return "";
+                        }
                         return item.qText;
                     });
                     selection = selection.concat(selectionData);
@@ -175,7 +178,7 @@ function(
         });
 
         return df.promise;
-    }
+    } 
 
     return {
         support: {
