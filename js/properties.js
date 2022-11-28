@@ -9,6 +9,32 @@ var connectionSection = {
 			expression: "optional"
 		},
 
+		jwtAuth: {
+			ref: "npsod.conn.jwtAuth",
+			label: "JWT Auth",
+			type: "boolean",
+			component: "switch",
+			options: [
+				{
+				  value: true,
+				  label: "Yes",
+				},
+				{
+				  value: false,
+				  label: "No",
+				},
+			],
+			defaultValue: false,
+		},
+
+		jwtServer: {
+			ref: "npsod.conn.jwtServer",
+			label: "JWT Server Connection",
+			type: "string",
+			expression: "optional",
+			show: (data) => data?.npsod?.conn?.jwtAuth
+		},
+
 		/*
 		ntlm: {
 			ref: "npsod.conn.ntlm",

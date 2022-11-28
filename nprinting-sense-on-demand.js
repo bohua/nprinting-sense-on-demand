@@ -49,6 +49,46 @@ define([
             });
         }
 
+        function jwtAuthFn(conn) {
+            var URL = conn.jwtServer
+            if (!URL) return
+            return $.ajax({
+                url: URL,
+                method: 'GET',
+                xhrFields: {
+                    withCredentials: true
+                }
+            }).then(function({ token }) {
+                if (token) {
+                    return $.ajax({
+                        url: conn.server + 'api/v1/apps?limit=0',
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        },
+                        xhrFields: {
+                            withCredentials: true
+                        }
+                    })
+                } else {
+                    alert('invalid token');
+                }
+            }).catch(function() {
+                alert('invalid jwt server connection')
+            })
+        }
+
+        function logout(conn) {
+            var URL = conn.server + 'api/v1/logout'
+            return $.ajax({
+                url: URL,
+                method: 'GET',
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+        }
+
         var Progress = function (element) {
             var progress = 0;
             var bar = element;
@@ -414,6 +454,7 @@ define([
                 //$scope.label = "Export";
                 $scope.downloadable = false;
                 var conn = $scope.layout.npsod.conn;
+                // logout(conn);
                 var currReport = null;
                 var buttonPosition = ($scope.layout.npsod.button && $scope.layout.npsod.button.position) ? $scope.layout.npsod.button.position: 'top';
                 $scope.buttonStyle = {'vertical-align': buttonPosition };
@@ -423,9 +464,13 @@ define([
                 x.id = $scope.objId;
                 document.body.appendChild(x);
 
-                 var vars = document.getElementsByTagName('var');
+                var vars = document.getElementsByTagName('var');
                 if(vars[0].id==$scope.objId){
-                    getLoginNtlm(conn);
+                    if (conn.jwtAuth) {
+                        jwtAuthFn(conn);
+                    } else {
+                        getLoginNtlm(conn);
+                    }
                 }
 
                 $('.npsod-bar-btn').on('click', function () {
