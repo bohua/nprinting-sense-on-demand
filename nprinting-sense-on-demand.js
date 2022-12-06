@@ -52,29 +52,41 @@ define([
         function jwtAuthFn(conn) {
             var URL = conn.jwtServer
             if (!URL) return
-            return $.ajax({
-                url: URL,
-                method: 'GET',
-                xhrFields: {
-                    withCredentials: true
+            return app.global.getAuthenticatedUser(function(reply) {
+                let user = reply.qReturn,
+                currUser = user.split("\\");
+                if (currUser.length === 1) {
+                    currUser = user.split(";");
                 }
-            }).then(function({ token }) {
-                if (token) {
-                    return $.ajax({
-                        url: conn.server + 'api/v1/apps?limit=0',
-                        method: 'GET',
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        },
-                        xhrFields: {
-                            withCredentials: true
-                        }
-                    })
-                } else {
-                    alert('invalid token');
-                }
-            }).catch(function() {
-                alert('invalid jwt server connection')
+                
+                return $.ajax({
+                    url: URL,
+                    method: 'GET',
+                    headers: {
+                        qlikUser: user
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                }).then(function({ token }) {
+                    if (token) {
+                        return $.ajax({
+                            url: conn.server + 'api/v1/apps?limit=0',
+                            method: 'GET',
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            },
+                            xhrFields: {
+                                withCredentials: true
+                            }
+                        })
+                    } else {
+                        alert('invalid token');
+                    }
+                }).catch(function(err) {
+                    alert('invalid server connection, check console for details')
+                    console.error(err)
+                })
             })
         }
 
