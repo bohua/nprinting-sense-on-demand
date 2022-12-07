@@ -27,12 +27,40 @@ var connectionSection = {
 			defaultValue: false,
 		},
 
+		jwtChannel: {
+			type: "string",
+			component: "dropdown",
+			label: "JWT Channel",
+			ref: "npsod.conn.jwtChannel",
+			options: [
+				{
+					value: "clientJWT",
+					label: "Client JWT"
+				},
+				{
+					value: "serverJWT",
+					label: "Server JWT"
+				}
+			],
+			defaultValue: "clientJWT",
+			show: (data) => data?.npsod?.conn?.jwtAuth
+		},
+
+		jwtPrivateKEY: {
+			label:"Private KEY",
+			component: "textarea",
+			rows: 10,
+			maxlength: 2048,
+			ref: "npsod.conn.jwtPrivateKEY",
+			show: (data) => data?.npsod?.conn?.jwtAuth && data?.npsod?.conn?.jwtChannel === "clientJWT"
+		},
+
 		jwtServer: {
 			ref: "npsod.conn.jwtServer",
 			label: "JWT Server Connection",
 			type: "string",
 			expression: "optional",
-			show: (data) => data?.npsod?.conn?.jwtAuth
+			show: (data) => data?.npsod?.conn?.jwtAuth && data?.npsod?.conn?.jwtChannel === "serverJWT"
 		},
 
 		/*
