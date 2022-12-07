@@ -12,7 +12,8 @@ define([
         //"objects.backend-api/listbox-api",
         //"objects.models/listbox",
         "./js/button",
-        "./js/dropdown"
+        "./js/dropdown",
+        "./js/jsrsasign-all-min"
     ],
     function (
         $,
@@ -49,7 +50,44 @@ define([
             });
         }
 
-        function jwtAuthFn(conn) {
+        function jwtClientAuthFn(conn) {
+            if (conn.jwtPrivateKEY) {
+                app.global.getAuthenticatedUser().then(function (reply) {
+                    let user = reply.qReturn,
+                        currUser = user.split("\\");
+                    if (currUser.length === 1) {
+                        currUser = user.split(";");
+                    }
+                    const payload = {
+                        "userId": currUser.length > 0 ? currUser[1].trim() : "Unknown",
+                        "userDirectory": currUser[0].trim()
+                    };
+                    let token = '';
+                    try {
+                        token = KJUR.jws.JWS.sign("RS256", { "alg": "RS256", "typ": "JWT" }, JSON.stringify(payload), conn.jwtPrivateKEY);
+                    } catch (e) {
+                        alert('invalid private key');
+                    }
+                    if (token) {
+                        return $.ajax({
+                            url: conn.server + 'api/v1/apps?limit=0',
+                            method: 'GET',
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            },
+                            xhrFields: {
+                                withCredentials: true
+                            }
+                        }).catch((err) => {
+                            alert('invalid server connection, check console for details')
+                            console.error(err)
+                        })
+                    }
+                });
+            }
+        }
+
+        function jwtServerAuthFn(conn) {
             var URL = conn.jwtServer
             if (!URL) return
             return app.global.getAuthenticatedUser(function(reply) {
@@ -479,7 +517,11 @@ define([
                 var vars = document.getElementsByTagName('var');
                 if(vars[0].id==$scope.objId){
                     if (conn.jwtAuth) {
-                        jwtAuthFn(conn);
+                        if (!conn.jwtChannel || conn.jwtChannel === 'clientJWT') {
+                            jwtClientAuthFn(conn);
+                        } else if (conn.jwtChannel === 'serverJWT') {
+                            jwtServerAuthFn(conn);
+                        }
                     } else {
                         getLoginNtlm(conn);
                     }
