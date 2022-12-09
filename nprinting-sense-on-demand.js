@@ -56,7 +56,14 @@ define([
                     let user = reply.qReturn,
                         currUser = user.split("\\");
                     if (currUser.length === 1) {
-                        currUser = user.split(";");
+                        currUser = user.split(";").map((section) => {
+                            const values = section.split("=");
+                            if (values.length > 1) {
+                              return values[1].trim();
+                            } else {
+                              return values.trim();
+                            }
+                        });
                     }
                     const payload = {
                         "userId": currUser.length > 0 ? currUser[1].trim() : "Unknown",
