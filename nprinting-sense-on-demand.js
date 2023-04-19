@@ -50,7 +50,7 @@ define([
             });
         }
 
-        function jwtClientAuthFn(conn) {
+        function jwtClientAuthFn(conn, $scope) {
             if (conn.jwtPrivateKEY) {
                 app.global.getAuthenticatedUser().then(function (reply) {
                     let user = reply.qReturn,
@@ -82,9 +82,8 @@ define([
                             headers: {
                                 Authorization: `Bearer ${token}`
                             },
-                            xhrFields: {
-                                withCredentials: true
-                            }
+                        }).then(() => {
+                            setJwtAuthToken(token, $scope);
                         }).catch((err) => {
                             alert('invalid server connection, check console for details')
                             console.error(err)
@@ -94,7 +93,7 @@ define([
             }
         }
 
-        function jwtServerAuthFn(conn) {
+        function jwtServerAuthFn(conn, $scope) {
             var URL = conn.jwtServer
             if (!URL) return
             return app.global.getAuthenticatedUser(function(reply) {
@@ -110,9 +109,6 @@ define([
                     headers: {
                         qlikUser: user
                     },
-                    xhrFields: {
-                        withCredentials: true
-                    }
                 }).then(function({ token }) {
                     if (token) {
                         return $.ajax({
@@ -121,10 +117,12 @@ define([
                             headers: {
                                 Authorization: `Bearer ${token}`
                             },
-                            xhrFields: {
-                                withCredentials: true
-                            }
-                        })
+                        }).then(() => {
+                            setJwtAuthToken(token, $scope);
+                        }).catch((err) => {
+                            alert('invalid server connection, check console for details')
+                            console.error(err)
+                        });
                     } else {
                         alert('invalid token');
                     }
@@ -135,13 +133,37 @@ define([
             })
         }
 
-        function logout(conn) {
+        function setJwtAuthToken(token, $scope) {
+            $scope.jwtAuthToken = token;
+        }
+
+        function clearJwtAuthToken($scope) {
+            $scope.jwtAuthToken = undefined;
+        }
+
+        function getJwtAuthToken(conn, $scope) {
+            if (conn.jwtAuth) {
+                if ($scope.jwtAuthToken) {
+                    return `Bearer ${$scope.jwtAuthToken}`;
+                } else {
+                    console.log('token does not exist, please try again!');
+                    return 'token pending';
+                }
+            } else {
+                return undefined;
+            }
+        }
+
+        function logout(conn, $scope) {
             var URL = conn.server + 'api/v1/logout'
             return $.ajax({
                 url: URL,
                 method: 'GET',
+                headers: {
+                    Authorization: getJwtAuthToken(conn, $scope),
+                },
                 xhrFields: {
-                    withCredentials: true
+                    withCredentials: !getJwtAuthToken(conn, $scope),
                 }
             });
         }
@@ -300,7 +322,7 @@ define([
             return Deferred.all(fieldPromises);
         }
 
-        function doExport(options) {
+        function doExport(options, $scope) {
             var conn = options.conn,
                 report = options.report,
                 format = options.format,
@@ -309,7 +331,7 @@ define([
                 //selections = getSelectionByQlik();
 
             return selections.then(function (allFieldSelections) {
-                return getConnections(conn).then(function (response) {
+                return getConnections(conn, $scope).then(function (response) {
                     var connectionId;
                     if (response.data.totalItems == 1) {
                         connectionId = response.data.items[0].id;
@@ -343,62 +365,77 @@ define([
                         contentType: 'application/json',
                         crossDomain: true,
                         data: JSON.stringify(onDemandRequest),
+                        headers: {
+                            Authorization: getJwtAuthToken(conn, $scope),
+                        },
                         xhrFields: {
-                            withCredentials: true
+                            withCredentials: !getJwtAuthToken(conn, $scope),
                         }
                     });
                 });
             });
         }
 
-        function getReportList(conn) {
+        function getReportList(conn, $scope) {
             var requestUrl = conn.server + 'api/v1/reports' + '?appId=' + conn.app + '&sort=+title';
 
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
-               xhrFields: {
-                    withCredentials: true
+                headers: {
+                    Authorization: getJwtAuthToken(conn, $scope),
+                },
+                xhrFields: {
+                    withCredentials: !getJwtAuthToken(conn, $scope),
                 }
             });
         }
 
-        function getExportFormats(conn, report) {
+        function getExportFormats(conn, report, $scope) {
             var requestUrl = conn.server + 'api/v1/reports' + '/' + report.id;
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                    Authorization: getJwtAuthToken(conn, $scope),
+                },
                 xhrFields: {
-                    withCredentials: true
+                    withCredentials: !getJwtAuthToken(conn, $scope),
                 }
             })
         }
 
-        function getTasks(conn) {
+        function getTasks(conn, $scope) {
             var requestUrl = conn.server + 'api/v1/ondemand/requests' + '?appId=' + conn.app + '&sort=-created';
 
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                    Authorization: getJwtAuthToken(conn, $scope),
+                },
                 xhrFields: {
-                    withCredentials: true
+                    withCredentials: !getJwtAuthToken(conn, $scope),
                 }
             });
         }
 
-        function getConnections(conn) {
+        function getConnections(conn, $scope) {
             var requestUrl = conn.server + 'api/v1/connections?appId=' + conn.app;
 
             return $.ajax({
                 url: requestUrl,
                 method: 'GET',
+                headers: {
+                    Authorization: getJwtAuthToken(conn, $scope),
+                },
                 xhrFields: {
-                    withCredentials: true
+                    withCredentials: !getJwtAuthToken(conn, $scope),
                 }
             });
         }
 
-        function deleteTask(conn, taskId) {
+        function deleteTask(conn, taskId, $scope) {
             var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId;
 
             $.support.cors = true;
@@ -406,11 +443,12 @@ define([
             return $.ajax({
                 url: requestUrl,
                 headers: {
-                    'access-control-allow-headers': 'content-type'
-                        },
+                    'access-control-allow-headers': 'content-type',
+                    Authorization: getJwtAuthToken(conn, $scope),
+                },
                 method: 'DELETE',
                 xhrFields: {
-                    withCredentials: true
+                    withCredentials: !getJwtAuthToken(conn, $scope),
                 }
             });
         }
@@ -511,7 +549,7 @@ define([
                 //$scope.label = "Export";
                 $scope.downloadable = false;
                 var conn = $scope.layout.npsod.conn;
-                // logout(conn);
+                // logout(conn, $scope);
                 var currReport = null;
                 var buttonPosition = ($scope.layout.npsod.button && $scope.layout.npsod.button.position) ? $scope.layout.npsod.button.position: 'top';
                 $scope.buttonStyle = {'vertical-align': buttonPosition };
@@ -525,9 +563,9 @@ define([
                 if(vars[0].id==$scope.objId){
                     if (conn.jwtAuth) {
                         if (!conn.jwtChannel || conn.jwtChannel === 'clientJWT') {
-                            jwtClientAuthFn(conn);
+                            jwtClientAuthFn(conn, $scope);
                         } else if (conn.jwtChannel === 'serverJWT') {
-                            jwtServerAuthFn(conn);
+                            jwtServerAuthFn(conn, $scope);
                         }
                     } else {
                         getLoginNtlm(conn);
@@ -538,6 +576,9 @@ define([
                     $scope.popupDg();
                 });
 
+                $scope.getJwtAuthToken = function(conn) {
+                    return getJwtAuthToken(conn, $scope);
+                };
 
                 $scope.doExport = function () {
                     var options = {
@@ -546,7 +587,7 @@ define([
                         format: conn.exportFormat
                     };
 
-                    doExport(options).then(function (response) {
+                    doExport(options, $scope).then(function (response) {
                         $scope.popupDg();
                     });
                 };
@@ -567,7 +608,7 @@ define([
                         });
 
                         var pullTaskHandler = $interval(function () {
-                            getTasks(conn).then(function (response) {
+                            getTasks(conn, $scope).then(function (response) {
                                 $scope.taskList = response.data.items;
                                 $scope.$apply();
                             });
@@ -585,7 +626,7 @@ define([
                 };
 
                 $scope.go2SelectReportStage = function () {
-                    getReportList(conn).then(function (response) {
+                    getReportList(conn, $scope).then(function (response) {
                         $scope.reportList = response.data;
                         $scope.stage = 'selectReport';
                         $scope.$apply();
@@ -593,7 +634,7 @@ define([
                 };
 
                 $scope.go2selectFormatStage = function (report) {
-                    getExportFormats(conn, report).then(function (response) {
+                    getExportFormats(conn, report, $scope).then(function (response) {
                         $scope.currReport = report;
                         $scope.outputFormats = response.data.outputFormats;
 
@@ -610,13 +651,13 @@ define([
                         format: format
                     };
 
-                    doExport(options).then(function () {
+                    doExport(options, $scope).then(function () {
                         $scope.go2OverviewStage();
                     });
                 };
 
                 $scope.deleteTask = function (taskId) {
-                    deleteTask(conn, taskId).then(function () {
+                    deleteTask(conn, taskId, $scope).then(function () {
                         $scope.go2OverviewStage(conn);
                     });
                 };

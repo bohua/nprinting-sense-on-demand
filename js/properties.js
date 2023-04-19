@@ -105,11 +105,15 @@ var connectionSection = {
 			label: "Choose App",
 			ref: "npsod.conn.app",
 			options: function(data) {
+				const $scope = $(`#nprinting-object-${data.qInfo.qId}`).scope();
 				return $.ajax({
 					url: data.npsod.conn.server + 'api/v1/apps',
 					method: 'GET',
+					headers: {
+						Authorization: $scope.getJwtAuthToken(data.npsod.conn),
+					},
 					xhrFields: {
-						withCredentials: true
+						withCredentials: !$scope.getJwtAuthToken(data.npsod.conn),
 					}
 				}).then(function(response) {
 					return response.data.items.map(function(app) {
@@ -135,12 +139,15 @@ var ReportSection ={
 			ref: "npsod.conn.report",
 			options: function(data) {
 				var requestUrl = data.npsod.conn.server + 'api/v1/reports' + '?appId=' + data.npsod.conn.app + '&sort=+title';
-
+				const $scope = $(`#nprinting-object-${data.qInfo.qId}`).scope();
 				return $.ajax({
 					url: requestUrl,
 					method: 'GET',
+					headers: {
+						Authorization: $scope.getJwtAuthToken(data.npsod.conn),
+					},
 					xhrFields: {
-						withCredentials: true
+						withCredentials: !$scope.getJwtAuthToken(data.npsod.conn),
 					}
 				}).then(function(response) {
 					return response.data.items.map(function(report) {
@@ -160,12 +167,15 @@ var ReportSection ={
 			ref: "npsod.conn.exportFormat",
 			options: function(data) {
 				var requestUrl = data.npsod.conn.server + 'api/v1/reports' + '/' + data.npsod.conn.report;
-
+				const $scope = $(`#nprinting-object-${data.qInfo.qId}`).scope();
 				return $.ajax({
 					url: requestUrl,
 					method: 'GET',
+					headers: {
+						Authorization: $scope.getJwtAuthToken(data.npsod.conn),
+					},
 					xhrFields: {
-						withCredentials: true
+						withCredentials: !$scope.getJwtAuthToken(data.npsod.conn),
 					}
 				}).then(function(response) {
 					return response.data.outputFormats.map(function(format) {
