@@ -76,6 +76,8 @@ define([
                         alert('invalid private key');
                     }
                     if (token) {
+                        setJwtAuthToken(token, $scope);
+                        // just ping test
                         return $.ajax({
                             url: conn.server + 'api/v1/apps?limit=0',
                             method: 'GET',
@@ -83,7 +85,6 @@ define([
                                 Authorization: `Bearer ${token}`
                             },
                         }).then(() => {
-                            setJwtAuthToken(token, $scope);
                         }).catch((err) => {
                             alert('invalid server connection, check console for details')
                             console.error(err)
@@ -111,6 +112,8 @@ define([
                     },
                 }).then(function({ token }) {
                     if (token) {
+                        setJwtAuthToken(token, $scope);
+                        // just ping test
                         return $.ajax({
                             url: conn.server + 'api/v1/apps?limit=0',
                             method: 'GET',
@@ -118,7 +121,6 @@ define([
                                 Authorization: `Bearer ${token}`
                             },
                         }).then(() => {
-                            setJwtAuthToken(token, $scope);
                         }).catch((err) => {
                             alert('invalid server connection, check console for details')
                             console.error(err)
