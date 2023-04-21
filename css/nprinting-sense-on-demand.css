@@ -66,3 +66,37 @@ img.npsod-img-list:hover{
 .npsod-btn-container{
   display: table-cell;
 }
+
+span[name='status-tag'] {
+	box-sizing: border-box;
+	border: 1px solid;
+	border-radius: 4px;
+	text-align: center;
+	transition: all .2s;
+	white-space: nowrap;
+	font-size: 12px;
+	text-transform: uppercase;
+	position: relative;
+	top: -19px;
+	float: right;
+	padding: 0 5px;
+	margin: 0 5px;
+}
+
+span[name='status-tag'].status-tag-success {
+	color: #52c41a;
+    background: #f6ffed;
+    border-color: #b7eb8f;
+}
+
+span[name='status-tag'].status-tag-processing {
+	color: #1677ff;
+    background: #e6f4ff;
+    border-color: #91caff;
+}
+
+span[name='status-tag'].status-tag-error {
+	color: #ff4d4f;
+    background: #fff2f0;
+    border-color: #ffccc7;
+}

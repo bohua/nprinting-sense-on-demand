@@ -12,6 +12,8 @@
 					<span class="glyphicon glyphicon-remove-circle npsod-list-menu-icon pointer" ng-click="deleteTask(task.id)"></span>
 					<span ng-if="task.status=='completed'" class="npsod-list-menu-icon glyphicon glyphicon-save pointer" ng-click="downloadTask(task.id)"></span>
 					<img class="npsod-list-loading-icon" ng-src="{{getImg('LOADING')}}" ng-if="task.status=='running'||task.status=='queued'">
+
+					<span name="status-tag" ng-class="{'status-tag-processing': task.status=='running'||task.status=='queued', 'status-tag-success': task.status=='completed', 'status-tag-error': task.status=='failed'||task.status=='aborted'}">{{task.status}}</span>
 				</li>
 			</ul>
 		</div>
