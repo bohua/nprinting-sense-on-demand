@@ -7,7 +7,7 @@
 		<div ng-if="stage=='overview'">
 			<ul class="list-group npsod-list-group">
 				<li class="list-group-item npsod-task-list-item" ng-repeat="task in taskList">
-					<h4 class="list-group-item-heading bold">{{task.title}} <small>{{task.created}}</small></h4>
+					<h4 class="list-group-item-heading bold">{{task.title}} <small>{{formatLocalDate(task.created)}}</small></h4>
 					
 					<span class="glyphicon glyphicon-remove-circle npsod-list-menu-icon pointer" ng-click="deleteTask(task.id)"></span>
 					<span ng-if="task.status=='completed'" class="npsod-list-menu-icon glyphicon glyphicon-save pointer" ng-click="downloadTask(task.id)"></span>
@@ -29,7 +29,7 @@
 					<h4 class="list-group-item-heading bold">{{report.title}}</h4>
 					<p class="list-group-item-text">Description: {{report.description}}</p>
 					<p class="list-group-item-text">Type: {{report.type}}</p>
-					<p class="list-group-item-text">Created: {{report.created}}</p>
+					<p class="list-group-item-text">Created: {{formatLocalDate(report.created)}}</p>
 				</div>
 			</div>
 		</div>

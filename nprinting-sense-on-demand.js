@@ -576,6 +576,12 @@ define([
                     $scope.popupDg();
                 });
 
+                $scope.formatLocalDate = function (dateString) {
+                    if (!dateString) return '-';
+                    const date = new Date(dateString);
+                    return date.toLocaleString();
+                }
+
                 $scope.getJwtAuthToken = function(conn) {
                     return getJwtAuthToken(conn, $scope);
                 };
