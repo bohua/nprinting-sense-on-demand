@@ -601,18 +601,12 @@ define([
                         var modal = $(".npsod-popup");
                         modal.find("button.cancel-button").on('qv-activate', function () {
                             modal.remove();
-                            if (angular.isDefined(pullTaskHandler)) {
-                                $interval.cancel(pullTaskHandler);
-                                pullTaskHandler = undefined;
+                            if (!!$scope.pullTaskHandler) {
+                                $interval.cancel($scope.pullTaskHandler);
+                                $scope.pullTaskHandler = undefined;
+                                $scope.$apply();
                             }
                         });
-
-                        var pullTaskHandler = $interval(function () {
-                            getTasks(conn, $scope).then(function (response) {
-                                $scope.taskList = response.data.items;
-                                $scope.$apply();
-                            });
-                        }, 1000);
 
                         $scope.go2OverviewStage(conn);
                         
@@ -623,6 +617,23 @@ define([
 
                 $scope.go2OverviewStage = function () {
                     $scope.stage = 'overview';
+                    if (!$scope.pullTaskHandler) {
+                        $scope.pullTaskHandler = $interval(function () {
+                            getTasks(conn, $scope).then(function (response) {
+                                $scope.taskList = response.data.items;
+                                $scope.$apply();
+    
+                                const hasInProgress = $scope.taskList.filter(t => ['running', 'queued'].includes(t.status)).length;
+                                if (hasInProgress <= 0) {
+                                    if (!!$scope.pullTaskHandler) {
+                                        $interval.cancel($scope.pullTaskHandler);
+                                        $scope.pullTaskHandler = undefined;
+                                        $scope.$apply();
+                                    }
+                                }
+                            });
+                        }, 1000);
+                    }
                 };
 
                 $scope.go2SelectReportStage = function () {
