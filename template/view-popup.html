@@ -40,7 +40,7 @@
 		<!-- Exporting Stage -->
 		<div ng-if="stage=='export'">
 			<div class="progress">
-				<div id="npsod-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+				<div id="npsod-progress-bar-{{layout.qInfo.qId}}" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
 					<span class="sr-only">0% Complete</span>
 				</div>
 			</div>
@@ -60,7 +60,7 @@
 			<button lui-class="lui-button" x-variant="inverse" class="cancel-button lui-button lui-button--inverse" ng-click="go2OverviewStage()">Back to Tasks</button>
 		</span>
 		<button lui-class="lui-button" x-variant="inverse" class="cancel-button lui-button lui-button--inverse">Close</button>
-		<iframe id="download" style="display:none;"></iframe>
+		<iframe id="download-{{layout.qInfo.qId}}" style="display:none;"></iframe>
 	</footer>
 </div>
 </div>

@@ -453,10 +453,10 @@ define([
             });
         }
 
-        function downloadTask(conn, taskId) {
+        function downloadTask(conn, taskId, $scope) {
             var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId + '/result';
 
-            document.getElementById('download').src = requestUrl;
+            document.getElementById(`download-${$scope.layout.qInfo.qId}`).src = requestUrl;
         }
 
         function getImg(type) {
@@ -555,11 +555,11 @@ define([
                 $scope.buttonStyle = {'vertical-align': buttonPosition };
 
                 $scope.objId = Math.floor(Math.random()*1000000);
-                var x = document.createElement("var");
+                var x = document.createElement(`var-${$scope.layout.qInfo.qId}`);
                 x.id = $scope.objId;
                 document.body.appendChild(x);
 
-                var vars = document.getElementsByTagName('var');
+                var vars = document.getElementsByTagName(`var-${$scope.layout.qInfo.qId}`);
                 if(vars[0].id==$scope.objId){
                     if (conn.jwtAuth) {
                         if (!conn.jwtChannel || conn.jwtChannel === 'clientJWT') {
@@ -680,7 +680,7 @@ define([
                 };
 
                 $scope.downloadTask = function (taskId) {
-                    downloadTask(conn, taskId);
+                    downloadTask(conn, taskId, $scope);
                 };
 
                 //Selection Listener
