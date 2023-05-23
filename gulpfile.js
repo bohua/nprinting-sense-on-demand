@@ -9,7 +9,7 @@ var zip = require('gulp-zip');
 
 var DIST = './dist',
 	SRC = './src',
-	NAME = pkg.name,
+	NAME = 'qlik-on-demand-reporting',
 	VERSION = process.env.VERSION || 'local-dev';
 
 gulp.task('qext', function () {

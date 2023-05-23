@@ -1,5 +1,5 @@
 {
-    "name": "qlik-on-demand-reporting",
+    "name": "@qlik/qlik-on-demand-reporting",
     "version": "2.22.0",
     "description": "Reporting on demand control for Qlik Sense.",
     "private": true,
