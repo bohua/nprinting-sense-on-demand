@@ -76,6 +76,8 @@ define([
                         alert('invalid private key');
                     }
                     if (token) {
+                        setJwtAuthToken(token, $scope);
+                        // just ping test
                         return $.ajax({
                             url: conn.server + 'api/v1/apps?limit=0',
                             method: 'GET',
@@ -83,7 +85,6 @@ define([
                                 Authorization: `Bearer ${token}`
                             },
                         }).then(() => {
-                            setJwtAuthToken(token, $scope);
                         }).catch((err) => {
                             alert('invalid server connection, check console for details')
                             console.error(err)
@@ -111,6 +112,8 @@ define([
                     },
                 }).then(function({ token }) {
                     if (token) {
+                        setJwtAuthToken(token, $scope);
+                        // just ping test
                         return $.ajax({
                             url: conn.server + 'api/v1/apps?limit=0',
                             method: 'GET',
@@ -118,7 +121,6 @@ define([
                                 Authorization: `Bearer ${token}`
                             },
                         }).then(() => {
-                            setJwtAuthToken(token, $scope);
                         }).catch((err) => {
                             alert('invalid server connection, check console for details')
                             console.error(err)
@@ -453,10 +455,10 @@ define([
             });
         }
 
-        function downloadTask(conn, taskId) {
+        function downloadTask(conn, taskId, $scope) {
             var requestUrl = conn.server + 'api/v1/ondemand/requests/' + taskId + '/result';
 
-            document.getElementById('download').src = requestUrl;
+            document.getElementById(`download-${$scope.layout.qInfo.qId}`).src = requestUrl;
         }
 
         function getImg(type) {
@@ -555,11 +557,11 @@ define([
                 $scope.buttonStyle = {'vertical-align': buttonPosition };
 
                 $scope.objId = Math.floor(Math.random()*1000000);
-                var x = document.createElement("var");
+                var x = document.createElement(`var-${$scope.layout.qInfo.qId}`);
                 x.id = $scope.objId;
                 document.body.appendChild(x);
 
-                var vars = document.getElementsByTagName('var');
+                var vars = document.getElementsByTagName(`var-${$scope.layout.qInfo.qId}`);
                 if(vars[0].id==$scope.objId){
                     if (conn.jwtAuth) {
                         if (!conn.jwtChannel || conn.jwtChannel === 'clientJWT') {
@@ -575,6 +577,12 @@ define([
                 $('.npsod-bar-btn').on('click', function () {
                     $scope.popupDg();
                 });
+
+                $scope.formatLocalDate = function (dateString) {
+                    if (!dateString) return '-';
+                    const date = new Date(dateString);
+                    return date.toLocaleString();
+                }
 
                 $scope.getJwtAuthToken = function(conn) {
                     return getJwtAuthToken(conn, $scope);
@@ -601,18 +609,12 @@ define([
                         var modal = $(".npsod-popup");
                         modal.find("button.cancel-button").on('qv-activate', function () {
                             modal.remove();
-                            if (angular.isDefined(pullTaskHandler)) {
-                                $interval.cancel(pullTaskHandler);
-                                pullTaskHandler = undefined;
+                            if (!!$scope.pullTaskHandler) {
+                                $interval.cancel($scope.pullTaskHandler);
+                                $scope.pullTaskHandler = undefined;
+                                $scope.$apply();
                             }
                         });
-
-                        var pullTaskHandler = $interval(function () {
-                            getTasks(conn, $scope).then(function (response) {
-                                $scope.taskList = response.data.items;
-                                $scope.$apply();
-                            });
-                        }, 1000);
 
                         $scope.go2OverviewStage(conn);
                         
@@ -623,6 +625,23 @@ define([
 
                 $scope.go2OverviewStage = function () {
                     $scope.stage = 'overview';
+                    if (!$scope.pullTaskHandler) {
+                        $scope.pullTaskHandler = $interval(function () {
+                            getTasks(conn, $scope).then(function (response) {
+                                $scope.taskList = response.data.items;
+                                $scope.$apply();
+    
+                                const hasInProgress = $scope.taskList.filter(t => ['running', 'queued'].includes(t.status)).length;
+                                if (hasInProgress <= 0) {
+                                    if (!!$scope.pullTaskHandler) {
+                                        $interval.cancel($scope.pullTaskHandler);
+                                        $scope.pullTaskHandler = undefined;
+                                        $scope.$apply();
+                                    }
+                                }
+                            });
+                        }, 1000);
+                    }
                 };
 
                 $scope.go2SelectReportStage = function () {
@@ -663,7 +682,7 @@ define([
                 };
 
                 $scope.downloadTask = function (taskId) {
-                    downloadTask(conn, taskId);
+                    downloadTask(conn, taskId, $scope);
                 };
 
                 //Selection Listener
