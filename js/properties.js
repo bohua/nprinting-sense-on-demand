@@ -228,6 +228,23 @@ var AppearanceSection = {
 						  }
 						],
 						defaultValue: "top"
+					},	  
+					buttonColorExp: {
+						ref: "npsod.button.bgColor",
+						label: "Button background color",
+						type: "string",
+						expression: "optional"
+					},
+					fontColorExp: {
+						ref: "npsod.button.fontColor",
+						label: "Button font color",
+						type: "string",
+						expression: "optional"
+					},
+					fontSize: {
+						ref: "npsod.button.fontSize",
+						label: "Button font size (px)",
+						type: "number"
 					},
 					DomId: {
 						type: "string",

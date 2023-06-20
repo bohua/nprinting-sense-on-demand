@@ -711,6 +711,12 @@ define([
                 $scope.DomId = layout.npsod.button.DomId;
                 $scope.CSSConditionalClass = (layout.npsod.button.CSSConditionalClass || layout.npsod.button.CSSConditionalClass.length>0) ? layout.npsod.button.CSSConditionalClass : '';
 
+                $scope.buttonPointStyle = {
+                    'background-color': (layout.npsod.button && layout.npsod.button.bgColor) ? layout.npsod.button.bgColor: undefined,
+                    'border-color': (layout.npsod.button && layout.npsod.button.bgColor) ? layout.npsod.button.bgColor: undefined,
+                    'color': (layout.npsod.button && layout.npsod.button.fontColor) ? layout.npsod.button.fontColor: undefined,
+                    'font-size': (layout.npsod.button && layout.npsod.button.fontSize) ? layout.npsod.button.fontSize: undefined,
+                };
 
                 },
             /*
