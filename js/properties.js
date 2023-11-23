@@ -106,14 +106,15 @@ var connectionSection = {
 			ref: "npsod.conn.app",
 			options: function(data) {
 				const $scope = $(`#nprinting-object-${data.qInfo.qId}`).scope();
+				const conn = $scope.layout.npsod.conn;
 				return $.ajax({
-					url: data.npsod.conn.server + 'api/v1/apps',
+					url: conn.server + 'api/v1/apps',
 					method: 'GET',
 					headers: {
-						Authorization: $scope.getJwtAuthToken(data.npsod.conn),
+						Authorization: $scope.getJwtAuthToken(conn),
 					},
 					xhrFields: {
-						withCredentials: !$scope.getJwtAuthToken(data.npsod.conn),
+						withCredentials: !$scope.getJwtAuthToken(conn),
 					}
 				}).then(function(response) {
 					return response.data.items.map(function(app) {
@@ -138,16 +139,17 @@ var ReportSection ={
 			label: "Choose Report",
 			ref: "npsod.conn.report",
 			options: function(data) {
-				var requestUrl = data.npsod.conn.server + 'api/v1/reports' + '?appId=' + data.npsod.conn.app + '&sort=+title';
 				const $scope = $(`#nprinting-object-${data.qInfo.qId}`).scope();
+				const conn = $scope.layout.npsod.conn;
+				var requestUrl = conn.server + 'api/v1/reports' + '?appId=' + conn.app + '&sort=+title&limit=250';
 				return $.ajax({
 					url: requestUrl,
 					method: 'GET',
 					headers: {
-						Authorization: $scope.getJwtAuthToken(data.npsod.conn),
+						Authorization: $scope.getJwtAuthToken(conn),
 					},
 					xhrFields: {
-						withCredentials: !$scope.getJwtAuthToken(data.npsod.conn),
+						withCredentials: !$scope.getJwtAuthToken(conn),
 					}
 				}).then(function(response) {
 					return response.data.items.map(function(report) {
@@ -166,16 +168,17 @@ var ReportSection ={
 			label: "Default Export Format",
 			ref: "npsod.conn.exportFormat",
 			options: function(data) {
-				var requestUrl = data.npsod.conn.server + 'api/v1/reports' + '/' + data.npsod.conn.report;
 				const $scope = $(`#nprinting-object-${data.qInfo.qId}`).scope();
+				const conn = $scope.layout.npsod.conn;
+				var requestUrl = conn.server + 'api/v1/reports' + '/' + conn.report;
 				return $.ajax({
 					url: requestUrl,
 					method: 'GET',
 					headers: {
-						Authorization: $scope.getJwtAuthToken(data.npsod.conn),
+						Authorization: $scope.getJwtAuthToken(conn),
 					},
 					xhrFields: {
-						withCredentials: !$scope.getJwtAuthToken(data.npsod.conn),
+						withCredentials: !$scope.getJwtAuthToken(conn),
 					}
 				}).then(function(response) {
 					return response.data.outputFormats.map(function(format) {
@@ -225,6 +228,23 @@ var AppearanceSection = {
 						  }
 						],
 						defaultValue: "top"
+					},	  
+					buttonColorExp: {
+						ref: "npsod.button.bgColor",
+						label: "Button background color",
+						type: "string",
+						expression: "optional"
+					},
+					fontColorExp: {
+						ref: "npsod.button.fontColor",
+						label: "Button font color",
+						type: "string",
+						expression: "optional"
+					},
+					fontSize: {
+						ref: "npsod.button.fontSize",
+						label: "Button font size (px)",
+						type: "number"
 					},
 					DomId: {
 						type: "string",
