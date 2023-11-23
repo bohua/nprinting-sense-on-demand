@@ -379,7 +379,7 @@ define([
         }
 
         function getReportList(conn, $scope) {
-            var requestUrl = conn.server + 'api/v1/reports' + '?appId=' + conn.app + '&sort=+title';
+            var requestUrl = conn.server + 'api/v1/reports' + '?appId=' + conn.app + '&sort=+title&limit=250';
 
             return $.ajax({
                 url: requestUrl,
@@ -423,7 +423,7 @@ define([
         }
 
         function getConnections(conn, $scope) {
-            var requestUrl = conn.server + 'api/v1/connections?appId=' + conn.app;
+            var requestUrl = conn.server + 'api/v1/connections?appId=' + conn.app + '&limit=250';
 
             return $.ajax({
                 url: requestUrl,
